@@ -12,11 +12,11 @@ IconType convertToIcon(std::string gamemode)
 	{
 		return IconType::Ball;
 	}
-	else if (value == std::string_view("Bird"))
+	else if (value == std::string_view("UFO"))
 	{
 		return IconType::Ufo;
 	}
-	else if (value == std::string_view("Dart"))
+	else if (value == std::string_view("Wave"))
 	{
 		return IconType::Wave;
 	}

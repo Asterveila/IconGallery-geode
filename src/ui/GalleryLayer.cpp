@@ -26,7 +26,7 @@ bool GalleryLayer::init()
 
 	//	Frame
 	m_frame = NineSlice::create("Frame.png"_spr);
-	m_frame->setContentSize({400, 252});
+	m_frame->setContentSize({400, 256});
 	addChildAtPosition(m_frame, Anchor::Center, ccp(0, 0), false);
 
 	//	Title
@@ -102,6 +102,8 @@ void GalleryLayer::loadIcons()
 	//	For Loop to add the icons
 	for (auto &value : m_fetchedData)
 	{
+		if(ii >= 10) break;
+
 		auto iconObject = value;
 
 		GalleryObject *iconData = GalleryObject::create(
