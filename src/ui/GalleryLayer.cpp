@@ -2,6 +2,8 @@
 #include "../nodes/GalleryObject.hpp"
 #include "../nodes/GalleryCell.hpp"
 
+const int CELL_HEIGHT = 80;
+
 bool GalleryLayer::init()
 {
 	if (!CCLayer::init())
@@ -61,73 +63,6 @@ bool GalleryLayer::init()
 	m_loading->setVisible(false);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
-	//	Test Json
-	/*
-	auto pageJson = matjson::parse(R"({
-		"1": {
-		"iconID": 0,
-		"iconName": "Test 1",
-		"iconAuthor": "ML500",
-		"description": "My own remake of Gelt's Bunny Icon — Replaces Cube 99 [ Master Pack ]",
-		"gamemode": "Cube",
-		"downloads": 82,
-		"isVanilla": true,
-		"hasProjectFiles": false
-	},
-	"2": {
-		"iconID": 2,
-		"iconName": "Test 2",
-		"iconAuthor": "Dibbj",
-		"description": "Vanilla: Replaces Spider 23.",
-		"gamemode": "Spider",
-		"downloads": 258,
-		"isVanilla": true,
-		"hasProjectFiles": true
-	},
-	"3": {
-		"iconID": 3,
-		"iconName": "Test 3",
-		"iconAuthor": "RetroAdvance64",
-		"description": "Swing featured in Supernova. Original concept was made by AngeloToons",
-		"gamemode": "Swing",
-		"downloads": 123,
-		"isVanilla": false,
-		"hasProjectFiles": false
-	}})")
-						.unwrap();
-
-	std::vector<GalleryObject *> icons = {};
-	int ii = 0;
-
-	//	For Loop to add the icons
-	for (auto &value : pageJson)
-	{
-		auto iconObject = value;
-
-		GalleryObject *iconData = GalleryObject::create(
-			iconObject["iconID"].asInt().unwrapOr(1),
-			iconObject["iconName"].asString().unwrapOr("None"),
-			iconObject["iconAuthor"].asString().unwrapOr("Tits"),
-			iconObject["description"].asString().unwrapOr("Failed"),
-			IconType::Cube,
-			iconObject["downloads"].asInt().unwrapOr(0),
-			iconObject["isVanilla"].asBool().unwrapOr(false),
-			iconObject["hasProjectFiles"].asBool().unwrapOr(false));
-
-		icons.push_back(iconData);
-
-		GalleryCell *cell = GalleryCell::create(iconData, ii % 2 == 0);
-		m_scrollLayer->m_contentLayer->addChild(cell);
-		cell->setPosition(0, 720 - (80 * ii));
-		ii++;
-	}
-
-	//	Fixes the scroll layer
-	int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
-	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (80 * 10)));
-	m_scrollLayer->moveToTop();
-	*/
-
 	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
 	return true;
@@ -170,11 +105,10 @@ void GalleryLayer::loadIcons()
 		auto iconObject = value;
 
 		GalleryObject *iconData = GalleryObject::create(
-			iconObject["ID"].asInt().unwrapOr(1),
-			iconObject["name"].asString().unwrapOr("None"),
-			iconObject["author"].asString().unwrapOr("Tits"),
-			iconObject["description"].asString().unwrapOr("Failed"),
-			IconType::Cube,
+			iconObject["name"].asString().unwrapOr("Unnamed"),
+			iconObject["author"].asString().unwrapOr("John Doe"),
+			iconObject["description"].asString().unwrap(),
+			iconObject["gamemode"].asString().unwrap(),
 			iconObject["downloads"].asInt().unwrapOr(0),
 			iconObject["isVanilla"].asBool().unwrapOr(false),
 			iconObject["hasProjectFiles"].asBool().unwrapOr(false));
@@ -183,13 +117,13 @@ void GalleryLayer::loadIcons()
 
 		GalleryCell *cell = GalleryCell::create(iconData, ii % 2 == 0);
 		m_scrollLayer->m_contentLayer->addChild(cell);
-		cell->setPosition(0, 720 - (80 * ii));
+		cell->setPosition(0, (CELL_HEIGHT * 10) - CELL_HEIGHT * (ii + 1));
 		ii++;
 	};
 
 	//	Fixes the scroll layer
 	int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
-	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (80 * 10)));
+	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * 10)));
 	m_scrollLayer->moveToTop();
 }
 

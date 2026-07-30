@@ -1,15 +1,58 @@
 #include "GalleryObject.hpp"
 
-GalleryObject *GalleryObject::create(int index, std::string name, std::string author, std::string desc, IconType gamemode, int downloads, bool isVanilla, bool hasProjectFiles)
+IconType convertToIcon(std::string gamemode)
+{
+	auto value = std::string_view(gamemode);
+
+	if (value == std::string_view("Ship"))
+	{
+		return IconType::Ship;
+	}
+	else if (value == std::string_view("Ball"))
+	{
+		return IconType::Ball;
+	}
+	else if (value == std::string_view("Bird"))
+	{
+		return IconType::Ufo;
+	}
+	else if (value == std::string_view("Dart"))
+	{
+		return IconType::Wave;
+	}
+	else if (value == std::string_view("Robot"))
+	{
+		return IconType::Robot;
+	}
+	else if (value == std::string_view("Spider"))
+	{
+		return IconType::Spider;
+	}
+	else if (value == std::string_view("Swing"))
+	{
+		return IconType::Swing;
+	}
+	else if (value == std::string_view("Jetpack"))
+	{
+		return IconType::Jetpack;
+	};
+
+	return IconType::Cube;
+};
+
+GalleryObject *GalleryObject::create(std::string name, std::string author, std::string desc, std::string gamemode, int downloads, bool isVanilla, bool hasProjectFiles)
 {
 	auto icon = new GalleryObject();
+	auto test = convertToIcon(gamemode);
 
 	//	Fills it with the info
-	icon->m_index = index;
-	icon->m_iconName = name;
-	icon->m_iconAuthor = author;
+	icon->m_name = name;
+	icon->m_author = author;
 	icon->m_description = desc;
-	icon->m_gamemode = gamemode;
+
+	icon->m_gamemodeString = gamemode;
+	icon->m_gamemode = test;
+
 	icon->m_downloads = downloads;
 	icon->m_isVanilla = isVanilla;
 	icon->m_hasProjectFiles = hasProjectFiles;
@@ -17,3 +60,8 @@ GalleryObject *GalleryObject::create(int index, std::string name, std::string au
 	//	Returns the created Object
 	return icon;
 };
+
+void GalleryObject::addCollaborators(std::vector<std::string> collab)
+{
+	this->m_collaborators = collab;
+}

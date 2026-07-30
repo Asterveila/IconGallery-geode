@@ -13,4 +13,6 @@ protected:
 
 public:
 	static GalleryCell *create(GalleryObject *data, bool even);
+
+	CCLabelBMFont *getGamemodeLabel(std::string label);
 };
