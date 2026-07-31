@@ -40,7 +40,7 @@ IconType convertToIcon(std::string gamemode)
 	return IconType::Cube;
 };
 
-GalleryObject *GalleryObject::create(std::string name, std::string author, std::string desc, std::string gamemode, int downloads, bool isVanilla, bool hasProjectFiles)
+GalleryObject *GalleryObject::create(std::string name, std::string author, std::string filename, std::string desc, std::string gamemode, int downloads, bool isVanilla, bool hasProjectFiles)
 {
 	auto icon = new GalleryObject();
 	auto test = convertToIcon(gamemode);
@@ -49,6 +49,7 @@ GalleryObject *GalleryObject::create(std::string name, std::string author, std::
 	icon->m_name = name;
 	icon->m_author = author;
 	icon->m_description = desc;
+	icon->m_fileName = filename;
 
 	icon->m_gamemodeString = gamemode;
 	icon->m_gamemode = test;
@@ -74,8 +75,9 @@ void GalleryObject::downloadIcon()
 	req.onProgress([this, weak](web::WebProgress const &progress)
 				   { log::info("progress: {}", progress.downloadProgress().value_or(0.f)); });
 
+	auto downloadURL = fmt::format("https://github.com/Asterveila/IconGallery/raw/refs/heads/main/icons/{}", m_fileName);
 	m_listener.spawn(
-		req.get("https://github.com/Asterveila/IconGallery/raw/refs/heads/main/icons/Azoth.gdicon"),
+		req.get(downloadURL),
 		[this, weak](geode::utils::web::WebResponse res)
 		{
 			if (!weak.lock())
@@ -85,10 +87,50 @@ void GalleryObject::downloadIcon()
 
 			if (res.ok())
 			{
-				if (res.into(fmt::format("{}/{}.zip", Mod::get()->getConfigDir(), "Azoth")))
+				auto test = geode::utils::string::replace(m_fileName, ".gdicon", ".zip");
+				if (res.into(fmt::format("{}/{}", Mod::get()->getConfigDir(), test)))
 				{
-					Notification::create("Icon Downloaded!", NotificationIcon::Success)->show();
+					m_zipfile = fmt::format("{}/{}", Mod::get()->getConfigDir(), test);
+
+					auto popup = createQuickPopup(
+						"Icon Downloaded!",
+						"Do you want to unzip the files of the icon?",
+						"No",
+						"Yes",
+						[this](auto, bool btn)
+						{
+							if (btn)
+							{
+								unpackIcon();
+							}
+						});
 				}
+			}
+			else
+			{
+				Notification::create("There was an error", NotificationIcon::Error)->show();
+				log::error("Failed on loading data - {}", res.errorMessage());
 			}
 		});
 }
+
+void GalleryObject::unpackIcon()
+{
+
+	std::vector<std::string> gamemodeFile = {
+		"icon",
+		"ship",
+		"ball",
+		"ufo",
+		"wave",
+		"robot",
+		"spider",
+		"swing",
+		"jetpack"
+	};
+
+	auto gamemode = gamemodeFile[(int)m_gamemode];
+	auto zipfilePath = m_zipfile;
+	auto unzipDir = Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir() / gamemode;
+	auto result = utils::file::Unzip::intoDir(zipfilePath, unzipDir, true);
+};

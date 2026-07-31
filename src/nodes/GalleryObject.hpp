@@ -18,13 +18,14 @@ public:
 	bool m_hasProjectFiles;
 
 	std::vector<std::string> m_collaborators = {};
+	std::filesystem::path m_zipfile = "";
 
 	IconType m_gamemode;
 	std::string m_gamemodeString;
 
 	// static GalleryObject *create(int index, std::string name, std::string author, std::string desc, IconType gamemode, int downloads, bool isVanilla, bool hasProjectFiles = false);
 
-	static GalleryObject *create(std::string name, std::string author, std::string desc = "", std::string gamemode = "Cube", int downloads = 0, bool isVanilla = false, bool hasProjectFiles = false);
+	static GalleryObject *create(std::string name, std::string author, std::string filename, std::string desc = "", std::string gamemode = "Cube", int downloads = 0, bool isVanilla = false, bool hasProjectFiles = false);
 	void addCollaborators(std::vector<std::string> collab);
 
 	//	void downloadIcon(); 
@@ -34,4 +35,5 @@ public:
 
 	void downloadIcon();
 	TaskHolder<geode::utils::web::WebResponse> m_listener;
+	void unpackIcon();
 };

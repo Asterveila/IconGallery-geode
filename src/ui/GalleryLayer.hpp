@@ -11,28 +11,28 @@ protected:
 	CCSprite *m_title = nullptr;
 	NineSlice *m_frame = nullptr;
 	ScrollLayer *m_scrollLayer = nullptr;
+	LoadingCircleSprite *m_loading = nullptr;
+
+	CCMenu *m_navMenu = nullptr;
 
 	virtual bool init();
 	virtual void keyBackClicked();
 	void onBack(CCObject *);
-
 	void onFolder(CCObject *);
 
-	LoadingCircleSprite *m_loading;
+	void createNavButton(int tag, bool active = 0);
+	void onNavButton(CCObject *sender);
 
-	//	Online Features
-	TaskHolder<web::WebResponse> m_listener;
-	void fetchGalleryData();
-
+	//	Webrequests
+	TaskHolder<web::WebResponse> m_indexListener;
+	void fetchGalleryIndex();
+	void loadIndex(int page = 0, IconType gamemode = IconType::Item);
 	matjson::Value m_fetchedData;
-	void loadIcons();
-
-	//	Test
-	TaskHolder<web::WebResponse> m_getIconsListener;
-	TaskHolder<web::WebResponse> m_getCountListener;
-	void fetchDataTest();
 
 public:
+	unsigned int m_activeBtn = 0;
+	bool m_activeFilter = false;
+
 	static GalleryLayer *create();
 	CCScene *scene();
 };
