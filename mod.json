@@ -19,10 +19,6 @@
 			"resources/*.png"
 		]
 	},
-	"links": {
-		"community": "https://discord.gg/tFUyJw5",
-		"homepage": "https://ml500.carrd.co/"
-	},
 	"tags": [
 		"interface",
 		"online",
