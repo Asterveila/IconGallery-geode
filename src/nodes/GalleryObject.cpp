@@ -65,3 +65,30 @@ void GalleryObject::addCollaborators(std::vector<std::string> collab)
 {
 	this->m_collaborators = collab;
 }
+
+void GalleryObject::downloadIcon()
+{
+	auto weak = geode::WeakRef(this);
+	auto req = geode::utils::web::WebRequest();
+
+	req.onProgress([this, weak](web::WebProgress const &progress)
+				   { log::info("progress: {}", progress.downloadProgress().value_or(0.f)); });
+
+	m_listener.spawn(
+		req.get("https://github.com/Asterveila/IconGallery/raw/refs/heads/main/icons/Azoth.gdicon"),
+		[this, weak](geode::utils::web::WebResponse res)
+		{
+			if (!weak.lock())
+			{
+				return;
+			}
+
+			if (res.ok())
+			{
+				if (res.into(fmt::format("{}/{}.zip", Mod::get()->getConfigDir(), "Azoth")))
+				{
+					Notification::create("Icon Downloaded!", NotificationIcon::Success)->show();
+				}
+			}
+		});
+}

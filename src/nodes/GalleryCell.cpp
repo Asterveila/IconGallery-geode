@@ -80,8 +80,25 @@ bool GalleryCell::init(GalleryObject *data, bool even)
 	auto m_format = data->m_isVanilla ? getGamemodeLabel("Vanilla") : getGamemodeLabel("More Icons");
 	this->addChildAtPosition(m_format, Anchor::Left, ccp(110 + m_label->getScaledContentWidth() + 5, -30), false);
 
+	//	Main Menu
+	auto m_menu = CCMenu::create();
+	m_menu->setContentSize(m_size);
+	this->addChildAtPosition(m_menu, Anchor::BottomLeft, ccp(0, 0), false);
+
+	auto m_downloadBtn = CCMenuItemSpriteExtra::create(
+		ButtonSprite::create("Download", 40, true, "bigFont.fnt", "GJ_button_01.png", 22.5f, 0.5f),
+		this,
+		menu_selector(GalleryCell::onDownload));
+
+	m_menu->addChildAtPosition(m_downloadBtn, Anchor::Right, ccp(-50, 0), false);
+
 	return true;
 };
+
+void GalleryCell::onDownload(CCObject *)
+{
+	m_data->downloadIcon();
+}
 
 CCLabelBMFont *GalleryCell::getGamemodeLabel(std::string text)
 {

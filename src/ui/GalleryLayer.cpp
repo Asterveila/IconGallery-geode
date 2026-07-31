@@ -11,6 +11,8 @@ bool GalleryLayer::init()
 
 	fetchGalleryData();
 
+	fetchDataTest();
+
 	auto SFC = CCSpriteFrameCache::get();
 	SFC->addSpriteFramesWithFile("GJ_ShopSheet01.plist");
 
@@ -45,6 +47,15 @@ bool GalleryLayer::init()
 	backBtn->setID("back-button"_spr);
 	backBtn->setSizeMult(1.2f);
 	menuBack->addChild(backBtn);
+
+	auto buttonMenu = CCMenu::create();
+	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
+
+	auto folderBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_folderBtn_001.png"),
+		this,
+		menu_selector(GalleryLayer::onFolder));
+	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomRight, ccp(-30, 30), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({356, 220});
@@ -94,6 +105,26 @@ void GalleryLayer::fetchGalleryData()
 		});
 };
 
+void GalleryLayer::fetchDataTest()
+{
+	auto req = web::WebRequest();
+
+	m_getIconsListener.spawn(
+		req.get("https://iconsgallery.pages.dev/icons/registry.json"),
+		[this](web::WebResponse res)
+		{
+			if (res.ok() && res.json().isOk())
+			{
+				Notification::create("Registry loaded", NotificationIcon::Success)->show();
+			}
+			else
+			{
+				Notification::create("Failed on getting Registry", NotificationIcon::Error)->show();
+				log::error("Failed on loading data");
+			}
+		});
+}
+
 void GalleryLayer::loadIcons()
 {
 	std::vector<GalleryObject *> icons = {};
@@ -102,7 +133,8 @@ void GalleryLayer::loadIcons()
 	//	For Loop to add the icons
 	for (auto &value : m_fetchedData)
 	{
-		if(ii >= 10) break;
+		if (ii >= 10)
+			break;
 
 		auto iconObject = value;
 
@@ -128,6 +160,11 @@ void GalleryLayer::loadIcons()
 	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * 10)));
 	m_scrollLayer->moveToTop();
 }
+
+void GalleryLayer::onFolder(CCObject *)
+{
+	utils::file::openFolder(Mod::get()->getConfigDir());
+};
 
 void GalleryLayer::onBack(CCObject *)
 {

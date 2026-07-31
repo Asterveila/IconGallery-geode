@@ -11,6 +11,8 @@ protected:
 
 	bool init(GalleryObject *data, bool even);
 
+	void onDownload(CCObject *);
+
 public:
 	static GalleryCell *create(GalleryObject *data, bool even);
 

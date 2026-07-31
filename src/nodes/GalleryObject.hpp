@@ -31,4 +31,7 @@ public:
 	//	bool isDownloading = false;
 	//	bool downloadSuccesful = false;
 	//	async::TaskHolder<geode::utils::web::WebResponse> m_downloadListener;
+
+	void downloadIcon();
+	TaskHolder<geode::utils::web::WebResponse> m_listener;
 };
