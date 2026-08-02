@@ -1,15 +1,13 @@
+#include "../nodes/Icon.hpp"
 #include "GalleryLayer.hpp"
-#include "../nodes/GalleryObject.hpp"
-#include "../nodes/GalleryCell.hpp"
+#include "IconCell.hpp"
 
-const int CELL_HEIGHT = 80;
+const int CELL_HEIGHT = 70;
 
 bool GalleryLayer::init()
 {
 	if (!CCLayer::init())
 		return false;
-
-	fetchGalleryIndex();
 
 	m_background = CCSprite::create("background.png"_spr);
 	auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -54,6 +52,25 @@ bool GalleryLayer::init()
 		menu_selector(GalleryLayer::onFolder));
 	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomRight, ccp(-30, 30), false);
 
+	auto m_searchMenu = CCMenu::create();
+	m_searchMenu->setContentSize({40.f, 220.f});
+	m_searchMenu->setLayout(ColumnLayout::create()
+								->setGap(2.f)
+								->setAutoScale(false)
+								->setAxisAlignment(AxisAlignment::End)
+								->setCrossAxisAlignment(AxisAlignment::Start));
+
+	addChildAtPosition(m_searchMenu, Anchor::Left, ccp(24, 0), false);
+
+	auto m_searchBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		this,
+		nullptr);
+
+	m_searchMenu->addChild(m_searchBtn);
+	m_searchMenu->updateLayout();
+
+	//	Navigation Menu
 	m_navMenu = CCMenu::create();
 	m_navMenu->setID("navigation-menu");
 	m_navMenu->setLayout(RowLayout::create()
@@ -81,6 +98,8 @@ bool GalleryLayer::init()
 	m_loading->setVisible(false);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
+	fetchGalleryIndex();
+
 	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
 	return true;
@@ -99,14 +118,13 @@ void GalleryLayer::fetchGalleryIndex()
 		{
 			if (res.ok() && res.json().isOk())
 			{
-				Notification::create("Data Loaded", NotificationIcon::Success)->show();
 				m_fetchedData = res.json().unwrap();
 				m_loading->setVisible(false);
 				loadIndex();
 			}
 			else
 			{
-				Notification::create("There was an error", NotificationIcon::Error)->show();
+				Notification::create("There was an error fetching the data", NotificationIcon::Error)->show();
 				log::error("Failed on loading data");
 			}
 		});
@@ -114,34 +132,34 @@ void GalleryLayer::fetchGalleryIndex()
 
 void GalleryLayer::loadIndex(int page, IconType type)
 {
-	std::vector<GalleryObject *> icons = {};
-
 	if (m_scrollLayer && m_scrollLayer->m_contentLayer->getChildrenCount() > 0)
 		m_scrollLayer->m_contentLayer->removeAllChildren();
 
+	std::vector<Icon *> icons = {};
+
 	for (auto &value : m_fetchedData)
 	{
-		auto iconObject = value;
+		auto iconData = value;
 
-		GalleryObject *iconData = GalleryObject::create(
-			iconObject["name"].asString().unwrapOr("Unnamed"),
-			iconObject["author"].asString().unwrapOr("John Doe"),
-			iconObject["file"].asString().unwrap(),
-			iconObject["description"].asString().unwrap(),
-			iconObject["gamemode"].asString().unwrap(),
-			iconObject["downloads"].asInt().unwrapOr(0),
-			iconObject["isVanilla"].asBool().unwrapOr(false),
-			iconObject["hasProjectFiles"].asBool().unwrapOr(false));
+		Icon *newIcon = Icon::create(
+			iconData["name"].asString().unwrap(),
+			iconData["author"].asString().unwrap(),
+			iconData["file"].asString().unwrap(),
+			iconData["gamemode"].asString().unwrap(),
+			iconData["description"].asString().unwrapOr(""),
+			iconData["downloads"].asInt().unwrapOr(0),
+			iconData["format"].asString().unwrapOr("More Icons"),
+			iconData["hasProjectFiles"].asBool().unwrapOr(false));
 
-		icons.push_back(iconData);
+		icons.push_back(newIcon);
 	}
 
-	std::vector<GalleryObject *> filtered = icons;
+	std::vector<Icon *> filtered = icons;
 	log::debug("Count {}", icons.size());
 
 	if (m_activeFilter)
 	{
-		filtered = utils::ranges::filter(icons, [type](GalleryObject *icon)
+		filtered = utils::ranges::filter(icons, [type](Icon *icon)
 										 { return icon->m_gamemode == type; });
 
 		log::debug("Filtered Count {}", filtered.size());
@@ -154,15 +172,15 @@ void GalleryLayer::loadIndex(int page, IconType type)
 	{
 		auto iconData = value;
 
-		GalleryCell *cell = GalleryCell::create(iconData, ii % 2 == 0);
+		IconCell *cell = IconCell::create(iconData, ii % 2 == 0);
 		m_scrollLayer->m_contentLayer->addChild(cell);
-		cell->setPosition(0, (CELL_HEIGHT * 10) - CELL_HEIGHT * (ii + 1));
+		cell->setPosition(0, (CELL_HEIGHT * filtered.size()) - CELL_HEIGHT * (ii + 1));
 		ii++;
 	}
 
 	//	Fixes the scroll layer
 	int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
-	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * 10)));
+	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * filtered.size())));
 	m_scrollLayer->moveToTop();
 }
 
