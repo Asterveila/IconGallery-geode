@@ -12,7 +12,19 @@
 	"developer": "ML500",
 	"description": "Sariah's Icon Gallery website now in GD!",
 	"dependencies": {
-		"geode.node-ids": ">=v1.23.3"
+		"geode.node-ids": ">=v1.23.3",
+		"hiimjustin000.more_icons": ">=v2.1.0"
+	},
+	"settings": {
+		"sort-order": {
+			"type": "string",
+			"name": "Sorting Order",
+			"one-of": [
+				"Recent",
+				"Most Downloaded"
+			],
+			"default": "Most Downloaded"
+		}
 	},
 	"resources": {
 		"sprites": [

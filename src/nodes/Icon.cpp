@@ -51,6 +51,24 @@ Icon *Icon::create(std::string name, std::string author, std::string filename, s
 	return icon;
 }
 
+Icon *Icon::createNew(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc, int downloads, std::string format)
+{
+	auto icon = new Icon();
+
+	//	Feels the Filling
+	icon->m_name = name;
+	icon->m_author = author;
+	icon->m_fileName = filename;
+	icon->m_previewURL = previewURL;
+	icon->m_description = desc;
+	icon->m_gamemode = IconType{gamemode};
+	icon->m_format = formatFromString(format);
+	icon->m_downloads = downloads;
+
+	//	Returns the created Icon
+	return icon;
+}
+
 void Icon::addCollaborators(std::vector<std::string> collab)
 {
 	//	Hi, wanna collab?
@@ -84,7 +102,8 @@ void Icon::downloadIcon()
 		});
 
 	//	Downloading
-	auto downloadURL = fmt::format("https://github.com/Asterveila/IconGallery/raw/refs/heads/main/icons/{}", m_fileName);
+	auto downloadURL = fmt::format("https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/sprites/{}", m_fileName);
+
 	m_listener.spawn(
 		req.get(downloadURL),
 		[this, weak](geode::utils::web::WebResponse res)
@@ -102,9 +121,17 @@ void Icon::downloadIcon()
 
 					m_zipfile = Mod::get()->getConfigDir() / test;
 
+					log::debug("Download completed");
+
+					if (m_iconCell)
+					{
+						log::debug("Cell Called");
+						m_iconCell->updateDownload();
+					}
+
 					auto popup = createQuickPopup(
 						"Icon Downloaded!",
-						"Do you want to unzip the files of the icon?",
+						"Do you want to unzip the files of the icon? (Note: This is still experimental and could crash)",
 						"No",
 						"Yes",
 						[this](auto, bool btn)
@@ -114,11 +141,6 @@ void Icon::downloadIcon()
 								unpackIcon();
 							}
 						});
-
-					if (m_iconCell)
-					{
-						m_iconCell->updateDownload();
-					}
 				};
 			}
 			else
@@ -150,13 +172,16 @@ void Icon::unpackIcon()
 		"robot",
 		"spider",
 		"swing",
-		"jetpack"
-	};
+		"jetpack"};
 
 	auto gamemode = gamemodeFile[(int)m_gamemode];
 	auto zipfilePath = m_zipfile;
 	auto unzipDir = Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir() / gamemode;
 	auto result = utils::file::Unzip::intoDir(zipfilePath, unzipDir, true);
 
-	log::debug("End of Unpacking?");
+	auto popup = createQuickPopup(
+		"Icon unpacked!",
+		"Icon succesfully unpacked. Please refresh the textures to load the icon via <cy>More Icons</c> mod!",
+		"Ok",
+		nullptr, [](auto, auto) {});
 };

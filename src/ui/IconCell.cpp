@@ -23,9 +23,28 @@ bool IconCell::init(Icon *m_icon, bool even)
 	else
 		m_background->setColor({161, 88, 44});
 
-	//	Placeholder Image
-	auto sprite = CCSprite::create("Placeholder.png"_spr);
-	this->addChildAtPosition(sprite, Anchor::Left, ccp(35, 0), false);
+	//	Preview
+	int attempts = 0;
+	m_preview = LazySprite::create({200, 200});
+	m_preview->setLoadCallback(
+		[this, &attempts, m_icon](Result<> result)
+		{
+			if (!result.isOk())
+			{
+				if (attempts < 3)
+				{
+					log::info("failed to load preview, please refresh Icon Gallery to try again");
+					m_preview->initWithFile("Placeholder.png"_spr);
+				}
+				else
+				{
+					m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
+					attempts += 1;
+				}
+			}
+		});
+	this->addChildAtPosition(m_preview, Anchor::Left, ccp(35, 0), false);
+	m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
 
 	//	Name of the Icon
 	auto m_iconName = CCLabelBMFont::create(m_icon->m_name.c_str(), "bigFont.fnt");
@@ -126,6 +145,8 @@ void IconCell::updateDownload()
 	if (!m_icon)
 		return;
 
+	log::debug("Update called");
+
 	if (m_icon->isDownloading)
 	{
 		m_downloadBtn->setVisible(false);
@@ -139,6 +160,8 @@ void IconCell::updateDownload()
 	if (m_icon->isDownloadSuccesful)
 	{
 		m_downloadBtn->setOpacity(50);
+
+		log::debug("Succesfull Called");
 	}
 }
 
@@ -208,8 +231,19 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 void IconCell::onDownload(CCObject *)
 {
-	m_icon->downloadIcon();
-	updateDownload();
+	auto popup = createQuickPopup(
+		"Download Icon?",
+		"Are you sure you want to download <cy>" + m_icon->m_name + "</c>?",
+		"No",
+		"Yes",
+		[this](auto, bool btn)
+		{
+			if (btn)
+			{
+				m_icon->downloadIcon();
+				updateDownload();
+			}
+		});
 }
 
 void IconCell::onInfo(CCObject *)

@@ -4,34 +4,55 @@
 #include <Geode/loader/Mod.hpp>
 using namespace geode::prelude;
 
-class GalleryLayer : public CCLayer
+enum GallerySort
+{
+	Recent,
+	MostDownloaded
+};
+
+class GalleryLayer : public CCLayer, public SetIDPopupDelegate
 {
 protected:
-	CCSprite *m_background = nullptr;
-	CCSprite *m_title = nullptr;
-	NineSlice *m_frame = nullptr;
-	ScrollLayer *m_scrollLayer = nullptr;
+	CCLabelBMFont *m_pageLabel = nullptr;
+
+	CCMenu *m_pagesMenu = nullptr;
+	CCMenu *m_modesMenu = nullptr;
+
+	CCMenuItemSpriteExtra *m_prevBtn = nullptr;
+	CCMenuItemSpriteExtra *m_nextBtn = nullptr;
+
 	LoadingCircleSprite *m_loading = nullptr;
 
-	CCMenu *m_navMenu = nullptr;
+	ScrollLayer *m_scrollLayer = nullptr;
 
-	virtual bool init();
-	virtual void keyBackClicked();
-	void onBack(CCObject *);
-	void onFolder(CCObject *);
+	virtual bool init() override;
+	virtual void keyBackClicked() override;
 
-	void createNavButton(int tag, bool active = 0);
-	void onNavButton(CCObject *sender);
+	void createModeButton(int tag, bool active = 0);
+	void setIDPopupClosed(SetIDPopup *popup, int value) override;
 
-	//	Webrequests
-	TaskHolder<web::WebResponse> m_indexListener;
-	void fetchGalleryIndex();
-	void loadIndex(int page = 0, IconType gamemode = IconType::Item);
+	//	Web Requesting
+	TaskHolder<web::WebResponse> m_listener;
+	void fetchGallery();
+	void loadGallery();
 	matjson::Value m_fetchedData;
 
 public:
+	unsigned int m_page = 0;
+	unsigned int m_maxPage = 999;
+	GallerySort m_sort = GallerySort::MostDownloaded;
+
 	unsigned int m_activeBtn = 0;
-	bool m_activeFilter = false;
+	bool m_isFilterActive = false;
+
+	void onBack(CCObject *sender);
+	void onPage(CCObject *sender);
+	void onFolder(CCObject *sender);
+	void onFindPage(CCObject *sender);
+	void onSettings(CCObject *sender);
+	void onNavButton(CCObject *sender);
+
+	void refreshGallery();
 
 	static GalleryLayer *create();
 	CCScene *scene();

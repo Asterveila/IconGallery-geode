@@ -14,6 +14,7 @@ protected:
 
 public:
 	CCMenuItemSpriteExtra *m_downloadBtn = nullptr;
+	LazySprite *m_preview = nullptr;
 
 	static IconCell *create(Icon *data, bool even);
 
