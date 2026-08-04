@@ -48,10 +48,7 @@ bool IconCell::init(Icon *icon, bool even)
 	m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
 
 	//	Name of the Icon
-	auto name = utils::string::split(m_icon->m_name.c_str(), " ");
-	name = utils::ranges::filter(name, [](std::string string){ return string.length() != 0; });
-
-	auto m_iconName = CCLabelBMFont::create(utils::string::join(name, " ").c_str(), "bigFont.fnt");
+	auto m_iconName = CCLabelBMFont::create(m_icon->m_name.c_str(), "bigFont.fnt");
 	m_iconName->limitLabelWidth(180.0f, 0.5f, 0.25f);
 	m_iconName->setAnchorPoint({0, 0.5});
 	this->addChildAtPosition(m_iconName, Anchor::Left, ccp(70, 15), false);

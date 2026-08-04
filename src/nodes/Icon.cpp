@@ -16,7 +16,7 @@ IconType iconFromString(std::string gamemode)
 
 	for (int ii = 0; ii < gamemodes.size(); ii++)
 	{
-		if (utils::string::equalsIgnoreCase(gamemodes[ii], gamemode))
+		if (geode::utils::string::equalsIgnoreCase(gamemodes[ii], gamemode))
 			return IconType{ii};
 	}
 
@@ -25,7 +25,7 @@ IconType iconFromString(std::string gamemode)
 
 IconFormat formatFromString(std::string format)
 {
-	if (utils::string::equalsIgnoreCase(format, "vanilla"))
+	if (geode::utils::string::equalsIgnoreCase(format, "vanilla"))
 	{
 		return IconFormat::Vanilla;
 	};

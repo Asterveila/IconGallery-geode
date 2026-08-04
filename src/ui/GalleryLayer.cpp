@@ -148,7 +148,7 @@ void GalleryLayer::fetchGallery()
 	std::string url = "https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/index";
 
 	auto order = Mod::get()->getSettingValue<std::string>("sort-order");
-	if (utils::string::equalsIgnoreCase(order, "Recent"))
+	if (geode::utils::string::equalsIgnoreCase(order, "Recent"))
 	{
 		url = fmt::format("{}?order=Recent", url);
 	}
