@@ -49,7 +49,7 @@ bool IconCell::init(Icon *icon, bool even)
 
 	//	Name of the Icon
 	auto name = utils::string::split(m_icon->m_name.c_str(), " ");
-	name = utils::ranges::filter(name, [](gd::string string){ return string.length() != 0; });
+	name = utils::ranges::filter(name, [](std::string string){ return string.length() != 0; });
 
 	auto m_iconName = CCLabelBMFont::create(utils::string::join(name, " ").c_str(), "bigFont.fnt");
 	m_iconName->limitLabelWidth(180.0f, 0.5f, 0.25f);
