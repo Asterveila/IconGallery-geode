@@ -35,9 +35,7 @@ public:
 	Slider * m_downloadBar = nullptr;
 
 	//	Creating and adding data
-	static Icon *create(std::string name, std::string author, std::string filename, std::string gamemode, std::string desc = "", int downloads = 0, std::string format = "vanilla", bool hasProjectFiles = false);
-	static Icon *createNew(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc = "", int downloads = 0, std::string format = "Vanilla");
-
+	static Icon *createIcon(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc = "", int downloads = 0, std::string format = "Vanilla");
 	void addCollaborators(std::vector<std::string> collab);
 
 	//	Downloading Processes

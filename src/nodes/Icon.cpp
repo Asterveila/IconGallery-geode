@@ -1,31 +1,11 @@
 #include "Icon.hpp"
 #include "../ui/IconCell.hpp"
 
-IconType iconFromString(std::string gamemode)
-{
-	std::vector<std::string> gamemodes = {
-		"Cube",
-		"Ship",
-		"Ball",
-		"UFO",
-		"Wave",
-		"Robot",
-		"Spider",
-		"Swing",
-		"Jetpack"};
-
-	for (int ii = 0; ii < gamemodes.size(); ii++)
-	{
-		if (geode::utils::string::equalsIgnoreCase(gamemodes[ii], gamemode))
-			return IconType{ii};
-	}
-
-	return IconType::Item;
-}
-
 IconFormat formatFromString(std::string format)
 {
-	if (geode::utils::string::equalsIgnoreCase(format, "vanilla"))
+	log::debug("CHECKING STRING FORMAT");
+
+	if (std::string_view(format) == std::string_view("Vanilla"))
 	{
 		return IconFormat::Vanilla;
 	};
@@ -33,25 +13,7 @@ IconFormat formatFromString(std::string format)
 	return IconFormat::MoreIcons;
 }
 
-Icon *Icon::create(std::string name, std::string author, std::string filename, std::string gamemode, std::string desc, int downloads, std::string format, bool hasProjectFiles)
-{
-	auto icon = new Icon();
-
-	//	Feels the Filling
-	icon->m_name = name;
-	icon->m_author = author;
-	icon->m_description = desc;
-	icon->m_fileName = filename;
-	icon->m_gamemode = iconFromString(gamemode);
-	icon->m_format = formatFromString(format);
-	icon->m_downloads = downloads;
-	icon->m_hasProjectFiles = hasProjectFiles;
-
-	//	Returns the created Icon
-	return icon;
-}
-
-Icon *Icon::createNew(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc, int downloads, std::string format)
+Icon *Icon::createIcon(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc, int downloads, std::string format)
 {
 	auto icon = new Icon();
 

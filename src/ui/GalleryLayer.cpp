@@ -122,7 +122,7 @@ bool GalleryLayer::init()
 	m_loading->setVisible(false);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
-	fetchGallery();
+	//	fetchGallery();
 
 	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
@@ -147,8 +147,9 @@ void GalleryLayer::fetchGallery()
 
 	std::string url = "https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/index";
 
+	//	Sorting order function
 	auto order = Mod::get()->getSettingValue<std::string>("sort-order");
-	if (geode::utils::string::equalsIgnoreCase(order, "Recent"))
+	if (std::string_view(order) == std::string_view("Recent"))
 	{
 		url = fmt::format("{}?order=Recent", url);
 	}
@@ -212,7 +213,7 @@ void GalleryLayer::loadGallery()
 	{
 		auto iconData = value;
 
-		Icon *newIcon = Icon::createNew(
+		Icon *newIcon = Icon::createIcon(
 			iconData["iconName"].asString().unwrap(),
 			iconData["author"].asString().unwrap(),
 			iconData["filename"].asString().unwrap(),
@@ -246,6 +247,34 @@ void GalleryLayer::refreshGallery()
 
 void GalleryLayer::createModeButton(int tag, bool active)
 {
+	std::vector<const char *> modeNames = {
+		"streak",
+		"icon",
+		"ship",
+		"ball",
+		"bird",
+		"dart",
+		"robot",
+		"spider",
+		"swing",
+		"jetpack"};
+
+	auto m_button = CCMenuItemToggler::createWithSize(
+		fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str(),
+		fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str(),
+		this,
+		menu_selector(GalleryLayer::onNavButton),
+		0.9);
+
+	m_button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
+	m_button->toggle(active);
+	m_button->setTag(tag);
+
+	//  Adds button to menu and updates layout.
+	m_modesMenu->addChild(m_button);
+	m_modesMenu->updateLayout();
+
+	/*
 	std::vector<const char *> sprites = {
 		"GamemodeAll.png"_spr,
 		"GamemodeCube.png"_spr,
@@ -259,26 +288,80 @@ void GalleryLayer::createModeButton(int tag, bool active)
 		"GamemodeJetpack.png"_spr,
 	};
 
-	//  Base color based on whenever the current page is on
-	auto buttonColor = (active) ? IconSelectBaseColor::Selected : IconSelectBaseColor::Unselected;
-	auto buttonSpr = IconSelectButtonSprite::createWithSprite(sprites[tag], 1.75f, buttonColor);
-	buttonSpr->setScale(0.9f);
+	const char *spriteName = "gj_streakBtn_off_001.png";
+	const char *mode = active ? "on" : "off";
 
-	//  Button
-	auto button = CCMenuItemSpriteExtra::create(
-		buttonSpr,
-		this,
-		menu_selector(GalleryLayer::onNavButton));
-	button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
-	button->setTag(tag);
+	std::vector<const char *> gamemodes = {
+		"all",
+		"icon",
+		"ship",
+		"ball",
+		"bird",
+		"dart",
+		"robot",
+		"spider",
+		"swing",
+		"jetpack"};
 
-	//  Adds button to menu and updates layout.
-	m_modesMenu->addChild(button);
-	m_modesMenu->updateLayout();
+	if (tag != 0)
+	{
+		spriteName = fmt::format("gj_{}Btn_{}_001.png", gamemodes[tag], mode).c_str();
+		auto buttonSpr = CCSprite::createWithSpriteFrameName(spriteName);
+
+		//  Button
+		auto button = CCMenuItemSpriteExtra::create(
+			buttonSpr,
+			this,
+			menu_selector(GalleryLayer::onNavButton));
+		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
+		button->setTag(tag);
+
+		//  Adds button to menu and updates layout.
+		m_modesMenu->addChild(button);
+		m_modesMenu->updateLayout();
+	}
+	else
+	{
+		//  Base color based on whenever the current page is on
+		auto buttonColor = (active) ? IconSelectBaseColor::Selected : IconSelectBaseColor::Unselected;
+		auto buttonSpr = IconSelectButtonSprite::createWithSprite(sprites[tag], 1.75f, buttonColor);
+		buttonSpr->setScale(0.9f);
+
+		//  Button
+		auto button = CCMenuItemSpriteExtra::create(
+			buttonSpr,
+			this,
+			menu_selector(GalleryLayer::onNavButton));
+		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
+		button->setTag(tag);
+
+		//  Adds button to menu and updates layout.
+		m_modesMenu->addChild(button);
+		m_modesMenu->updateLayout();
+	};
+	*/
 };
 
 void GalleryLayer::onNavButton(CCObject *sender)
 {
+	auto tag = sender->getTag();
+	auto m_prevBtn = m_activeBtn;
+	m_activeBtn = tag;
+
+	log::debug("Tag = {}", tag);
+
+	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevBtn)))
+	{
+		oldButton->toggle(false);
+	}
+
+	m_isFilterActive = tag != 0;
+	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
+	m_page = 0;
+
+	fetchGallery();
+
+	/*
 	auto tag = sender->getTag();
 	auto m_prevBtn = m_activeBtn;
 	m_activeBtn = tag;
@@ -304,6 +387,7 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	m_page = 0;
 
 	fetchGallery();
+	*/
 }
 
 void GalleryLayer::onPage(CCObject *sender)
