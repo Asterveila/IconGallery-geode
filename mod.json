@@ -8,7 +8,7 @@
 	},
 	"id": "ml5.icon-gallery",
 	"name": "Icon Gallery",
-	"version": "v1.0.0-alpha.1",
+	"version": "v0.0.0-alpha.1",
 	"developer": "ML500",
 	"description": "Sariah's Icon Gallery website now in GD!",
 	"dependencies": {

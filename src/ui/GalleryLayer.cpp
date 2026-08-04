@@ -89,11 +89,12 @@ bool GalleryLayer::init()
 	buttonMenu->setID("button-menu");
 	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
 
-	auto pagesBtn = CCMenuItemSpriteExtra::create(
+	m_pagesBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
 		this,
 		menu_selector(GalleryLayer::onFindPage));
-	buttonMenu->addChildAtPosition(pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
+	m_pagesBtn->setVisible(false);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
@@ -101,15 +102,13 @@ bool GalleryLayer::init()
 	auto settingsBtn = CCMenuItemSpriteExtra::create(
 		settingsSpr,
 		this,
-		menu_selector(GalleryLayer::onSettings)
-	);
+		menu_selector(GalleryLayer::onSettings));
 	buttonMenu->addChildAtPosition(settingsBtn, Anchor::BottomLeft, ccp(30, 30), false);
-	
+
 	auto folderBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_folderBtn_001.png"),
 		this,
-		menu_selector(GalleryLayer::onFolder)
-	);
+		menu_selector(GalleryLayer::onFolder));
 	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomRight, ccp(-30, 30), false);
 
 	//	Scroll Layer
@@ -140,13 +139,17 @@ void GalleryLayer::fetchGallery()
 	if (m_pageLabel)
 		m_pageLabel->setVisible(false);
 
+	if (m_pagesBtn)
+		m_pagesBtn->setVisible(false);
+
 	if (m_loading)
 		m_loading->setVisible(true);
 
 	std::string url = "https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/index";
 
 	auto order = Mod::get()->getSettingValue<std::string>("sort-order");
-	if(utils::string::equalsIgnoreCase(order, "Recent")){
+	if (utils::string::equalsIgnoreCase(order, "Recent"))
+	{
 		url = fmt::format("{}?order=Recent", url);
 	}
 	else
@@ -155,6 +158,9 @@ void GalleryLayer::fetchGallery()
 	}
 
 	url = fmt::format("{}&page={}", url, m_page + 1);
+
+	if (m_mode != IconType::Item)
+		url = fmt::format("{}&mode={}", url, (int)m_mode);
 
 	log::debug("URL = {}", url);
 
@@ -190,6 +196,11 @@ void GalleryLayer::loadGallery()
 	{
 		m_pageLabel->setCString(fmt::format("{} to {} of {}", offset + 1, offset + 10, totalIcons).c_str());
 		m_pageLabel->setVisible(true);
+	}
+
+	if (m_pagesBtn)
+	{
+		m_pagesBtn->setVisible(true);
 	}
 
 	auto fetchedIcons = m_fetchedData["icons"];
@@ -228,7 +239,8 @@ void GalleryLayer::loadGallery()
 	m_nextBtn->setVisible(m_page < m_maxPage);
 }
 
-void GalleryLayer::refreshGallery(){
+void GalleryLayer::refreshGallery()
+{
 	fetchGallery();
 }
 
@@ -251,7 +263,6 @@ void GalleryLayer::createModeButton(int tag, bool active)
 	auto buttonColor = (active) ? IconSelectBaseColor::Selected : IconSelectBaseColor::Unselected;
 	auto buttonSpr = IconSelectButtonSprite::createWithSprite(sprites[tag], 1.75f, buttonColor);
 	buttonSpr->setScale(0.9f);
-	buttonSpr->setOpacity(50);
 
 	//  Button
 	auto button = CCMenuItemSpriteExtra::create(
@@ -268,14 +279,6 @@ void GalleryLayer::createModeButton(int tag, bool active)
 
 void GalleryLayer::onNavButton(CCObject *sender)
 {
-	auto popup = createQuickPopup(
-		"Work in progress",
-		"This feature is currently not available, need to wait for Sarah to finish the API",
-		"Ok",
-		nullptr, [](auto, auto) {});
-
-	return;
-
 	auto tag = sender->getTag();
 	auto m_prevBtn = m_activeBtn;
 	m_activeBtn = tag;
@@ -297,15 +300,10 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	}
 
 	m_isFilterActive = tag != 0;
+	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
+	m_page = 0;
 
-	if (m_isFilterActive)
-	{
-		// loadIndex(0, IconType{tag - 1});
-	}
-	else
-	{
-		// loadIndex(0);
-	}
+	fetchGallery();
 }
 
 void GalleryLayer::onPage(CCObject *sender)
@@ -325,19 +323,23 @@ void GalleryLayer::onFindPage(CCObject *)
 	popup->show();
 };
 
-void GalleryLayer::setIDPopupClosed(SetIDPopup * popup, int value){
-	if(!popup || popup->m_cancelled) return;
+void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
+{
+	if (!popup || popup->m_cancelled)
+		return;
 
 	log::debug("Changed Page = {}", value);
 
 	int newPage = value;
-	if(m_page == newPage - 1) return;
+	if (m_page == newPage - 1)
+		return;
 
 	m_page = newPage - 1;
 	fetchGallery();
 };
 
-void GalleryLayer::onSettings(CCObject *){
+void GalleryLayer::onSettings(CCObject *)
+{
 	geode::openSettingsPopup(Mod::get());
 }
 

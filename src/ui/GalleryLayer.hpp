@@ -20,6 +20,7 @@ protected:
 
 	CCMenuItemSpriteExtra *m_prevBtn = nullptr;
 	CCMenuItemSpriteExtra *m_nextBtn = nullptr;
+	CCMenuItemSpriteExtra *m_pagesBtn = nullptr;
 
 	LoadingCircleSprite *m_loading = nullptr;
 
@@ -41,6 +42,7 @@ public:
 	unsigned int m_page = 0;
 	unsigned int m_maxPage = 999;
 	GallerySort m_sort = GallerySort::MostDownloaded;
+	IconType m_mode = IconType::Item;
 
 	unsigned int m_activeBtn = 0;
 	bool m_isFilterActive = false;

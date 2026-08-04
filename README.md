@@ -8,5 +8,5 @@ Quite a lot, since this code is still a work in progress, heavily prone to chang
 
 ### Credits
 
-- This mod is a port of [Asterveila's](https://github.com/Asterveila) website,
-- The code behind this mod is heavily based/modified on the [Texture's Workshops source code](https://github.com/Uproxide/Texture-Workshop) made by [Uproxide](https://github.com/Uproxide) and it's collaborators.
+- The code behind this mod is heavily based/modified from the [Texture's Workshops source code](https://github.com/Uproxide/Texture-Workshop) made by [Uproxide](https://github.com/Uproxide) and it's collaborators.
+- This mod is a port of [Asterveila's](https://github.com/Asterveila) Icon Gallery website.

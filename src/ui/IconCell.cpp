@@ -1,14 +1,15 @@
 #include "IconCell.hpp"
 
-bool IconCell::init(Icon *m_icon, bool even)
+bool IconCell::init(Icon *icon, bool even)
 {
 	if (!CCLayer::init())
 	{
 		return false;
 	}
 
+	m_icon = icon;
+	m_icon->m_iconCell = this;
 	this->setContentSize(m_size);
-	this->m_icon = m_icon;
 
 	//	Background of the Cell
 	auto m_background = CCLayerColor::create();
@@ -27,7 +28,7 @@ bool IconCell::init(Icon *m_icon, bool even)
 	int attempts = 0;
 	m_preview = LazySprite::create({200, 200});
 	m_preview->setLoadCallback(
-		[this, &attempts, m_icon](Result<> result)
+		[this, &attempts, icon](Result<> result)
 		{
 			if (!result.isOk())
 			{
@@ -47,8 +48,11 @@ bool IconCell::init(Icon *m_icon, bool even)
 	m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
 
 	//	Name of the Icon
-	auto m_iconName = CCLabelBMFont::create(m_icon->m_name.c_str(), "bigFont.fnt");
-	m_iconName->limitLabelWidth(240.0f, 0.5f, 0.45f);
+	auto name = utils::string::split(m_icon->m_name.c_str(), " ");
+	name = utils::ranges::filter(name, [](gd::string string){ return string.length() != 0; });
+
+	auto m_iconName = CCLabelBMFont::create(utils::string::join(name, " ").c_str(), "bigFont.fnt");
+	m_iconName->limitLabelWidth(180.0f, 0.5f, 0.25f);
 	m_iconName->setAnchorPoint({0, 0.5});
 	this->addChildAtPosition(m_iconName, Anchor::Left, ccp(70, 15), false);
 
@@ -110,21 +114,22 @@ bool IconCell::init(Icon *m_icon, bool even)
 	this->addChildAtPosition(m_menu, Anchor::BottomLeft, ccp(0, 0), false);
 
 	//	Info Button
-	auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
-	infoSpr->setScale(0.5f);
+	auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoBtn_001.png");
+	infoSpr->setScale(0.775f);
 
 	auto m_infoBtn = CCMenuItemSpriteExtra::create(
 		infoSpr,
 		this,
 		menu_selector(IconCell::onInfo));
-	m_menu->addChildAtPosition(m_infoBtn, Anchor::Left, ccp(m_iconName->getPositionX() + m_iconName->getScaledContentWidth() + 15, 15), false);
+	m_menu->addChildAtPosition(m_infoBtn, Anchor::Right, ccp(-70, 0), false);
 
 	//	Download Button
+	auto downloadSpr = CCSprite::createWithSpriteFrameName("GJ_downloadBtn_001.png");
 	m_downloadBtn = CCMenuItemSpriteExtra::create(
-		ButtonSprite::create("Download", 40, true, "bigFont.fnt", "GJ_button_01.png", 22.5f, 0.5f),
+		downloadSpr,
 		this,
 		menu_selector(IconCell::onDownload));
-	m_menu->addChildAtPosition(m_downloadBtn, Anchor::Right, ccp(-70, 0), false);
+	m_menu->addChildAtPosition(m_downloadBtn, Anchor::Right, ccp(-30, 0), false);
 
 	//	SLIDER
 	m_icon->m_downloadBar = Slider::create(this, nullptr);
@@ -159,8 +164,7 @@ void IconCell::updateDownload()
 
 	if (m_icon->isDownloadSuccesful)
 	{
-		m_downloadBtn->setOpacity(50);
-
+		m_downloadBtn->setVisible(false);
 		log::debug("Succesfull Called");
 	}
 }
