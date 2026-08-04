@@ -20,6 +20,8 @@ public:
 	std::string m_author;
 	std::string m_description;
 	std::string m_fileName;
+	std::string m_previewURL;
+
 	int m_downloads;
 	bool m_hasProjectFiles;
 
@@ -34,6 +36,8 @@ public:
 
 	//	Creating and adding data
 	static Icon *create(std::string name, std::string author, std::string filename, std::string gamemode, std::string desc = "", int downloads = 0, std::string format = "vanilla", bool hasProjectFiles = false);
+	static Icon *createNew(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc = "", int downloads = 0, std::string format = "Vanilla");
+
 	void addCollaborators(std::vector<std::string> collab);
 
 	//	Downloading Processes

@@ -13,7 +13,7 @@ class $modify(GarageLayer, GJGarageLayer)
 
 		auto menu = this->getChildByID("shards-menu");
 
-		auto spr = CircleButtonSprite::createWithSprite("dialogIcon_028.png", 1, CircleBaseColor::Gray, CircleBaseSize::Small);
+		auto spr = CircleButtonSprite::createWithSprite("dialogIcon_028.png", 1, CircleBaseColor::DarkPurple, CircleBaseSize::Small);
 		auto button = CCMenuItemSpriteExtra::create(
 			spr,
 			this,
@@ -33,4 +33,12 @@ class $modify(GarageLayer, GJGarageLayer)
 
 		CCDirector::sharedDirector()->pushScene(CCTransitionFade::create(0.5f, scene));
 	}
+};
+
+$execute{
+	listenForAllSettingChanges([](const std::string_view key, std::shared_ptr<SettingV3> setting){
+		if(auto layer = static_cast<GalleryLayer *>(CCScene::get()->getChildByID("icon-gallery-layer"))){
+			layer->refreshGallery();
+		};
+	});
 };
