@@ -29,7 +29,7 @@ protected:
 	virtual bool init() override;
 	virtual void keyBackClicked() override;
 
-	CCSprite * getModeSprite(int tag, bool active);
+	CCSprite *getModeSprite(int tag, bool active);
 	void createModeButton(int tag, bool active = 0);
 	void setIDPopupClosed(SetIDPopup *popup, int value) override;
 
@@ -38,8 +38,6 @@ protected:
 	void fetchGallery();
 	void loadGallery();
 	matjson::Value m_fetchedData;
-
-	
 
 public:
 	unsigned int m_page = 0;
@@ -58,6 +56,9 @@ public:
 	void onNavButton(CCObject *sender);
 
 	void refreshGallery();
+	// void showPackPopup();
+	// void createTexturePack();
+	void setupIconPack();
 
 	static GalleryLayer *create();
 	CCScene *scene();

@@ -73,12 +73,7 @@ bool IconCell::init(Icon *icon, bool even)
 	m_iconAuthor->setAnchorPoint({0, 0.5});
 	this->addChildAtPosition(m_iconAuthor, Anchor::Left, ccp(70, 0), false);
 
-	//	Description
-	//	auto m_iconDesc = TextArea::create(m_icon->m_description.c_str(), "chatFont.fnt", 0.5f, 200.0f, {0, 0.5}, 10, true);
-	//	m_iconDesc->setAnchorPoint({0, 0.5});
-	//	m_iconDesc->setScale(0.5f);
-	//	this->addChildAtPosition(m_iconDesc, Anchor::Left, ccp(70, 0), false);
-
+	//	Download Count
 	auto m_downloadIcon = CCSprite::createWithSpriteFrameName("GJ_downloadsIcon_001.png");
 	m_downloadIcon->setScale(0.4f);
 	m_downloadIcon->setAnchorPoint({0, 0.5});
@@ -91,9 +86,11 @@ bool IconCell::init(Icon *icon, bool even)
 	m_downloadCount->setColor({100, 255, 100});
 	this->addChildAtPosition(m_downloadCount, Anchor::Left, ccp(82.5, -15), false);
 
+	//	Gamemode Label
 	auto m_gamemodeLabel = getGamemodeLabel(m_icon->m_gamemode);
 	this->addChildAtPosition(m_gamemodeLabel, Anchor::Left, ccp(m_downloadCount->getPositionX() + m_downloadCount->getScaledContentWidth() + 5, -15), false);
 
+	//	Format Label
 	const char *formatText = m_icon->m_format == IconFormat::Vanilla ? "Vanilla" : "More Icons";
 	auto m_formatLabel = CCLabelBMFont::create(formatText, "bigFont.fnt");
 	m_formatLabel->setAnchorPoint({0, 0.5});
@@ -184,7 +181,7 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 		break;
 
 	case IconType::Ball:
-		text = "Cube";
+		text = "Ball";
 		color = {255, 120, 120};
 		break;
 
@@ -195,7 +192,7 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 	case IconType::Wave:
 		text = "Wave";
-		color = {120, 180, 255};
+		color = {120, 220, 255};
 		break;
 
 	case IconType::Robot:
@@ -205,12 +202,12 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 	case IconType::Spider:
 		text = "Spider";
-		color = {190, 120, 255};
+		color = {180, 90, 255};
 		break;
 
 	case IconType::Swing:
 		text = "Swing";
-		color = {255, 255, 120};
+		color = {255, 255, 80};
 		break;
 
 	case IconType::Jetpack:
@@ -232,6 +229,19 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 void IconCell::onDownload(CCObject *)
 {
+	auto noPackExists = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty();
+	if (noPackExists)
+	{
+		auto warning = createQuickPopup(
+		"Set Folder",
+		"Please set a Texture Pack folder in the settings of the mod to download icons",
+		"Ok",
+		nullptr,
+		[](auto, auto) {});
+
+		return;
+	};
+
 	auto popup = createQuickPopup(
 		"Download Icon?",
 		"Are you sure you want to download <cy>" + m_icon->m_name + "</c>?",

@@ -122,7 +122,18 @@ bool GalleryLayer::init()
 	m_loading->setVisible(false);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
-	//	fetchGallery();
+	//	If there's no "Icon Pack" settled (via settings), creates one.
+	auto noPackExists = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty();
+	if (noPackExists)
+	{
+		this->runAction(CCSequence::create(
+			CCDelayTime::create(1.f),
+			CCCallFunc::create(this, callfunc_selector(GalleryLayer::setupIconPack)),
+			0));
+	};
+
+	//	Calls teh function to fetch the Gallery.
+	fetchGallery();
 
 	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
@@ -130,6 +141,106 @@ bool GalleryLayer::init()
 	this->setID("icon-gallery-layer");
 	return true;
 };
+
+/*
+void GalleryLayer::showPackPopup()
+{
+	auto popup = createQuickPopup(
+		"No Texture Pack Found",
+		"Icons downloaded from here are saved in a Texture Pack. Do you want to make it? (Note: this is to avoid overwriting existing icons)",
+		"No",
+		"Yes",
+		[this](auto, bool btn)
+		{
+			if (btn)
+			{
+				createTexturePack();
+			}
+		});
+}
+*/
+
+void GalleryLayer::setupIconPack()
+{
+	auto popup = createQuickPopup(
+		"No Icon Pack found",
+		"Icons downloaded from here are saved in a Texture Pack. Do you want to make one? (Note: This is to avoid overwritting existing icons)",
+		"No",
+		"Yes",
+		[this](bool no, bool yes)
+		{
+			//	If yes, creates the directory
+			if (yes)
+			{
+				auto directory = Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir() / "packs";
+
+				if (std::filesystem::create_directories(directory / "Icon Gallery"))
+				{
+					auto json = matjson::makeObject({{"textureldr", "1.5.0"},
+													 {"name", "Downloaded Icons"},
+													 {"id", "icon_gallery.pack"},
+													 {"version", "1.0.0"},
+													 {"author", "Icon Gallery mod"}});
+
+					auto packPath = directory / "Icon Gallery";
+
+					if (!utils::file::writeString(packPath / "pack.json", json.dump()))
+					{
+						Notification::create("Error while creating the pack.json", NotificationIcon::Error)->show();
+						log::error("There was an error creating the Pack.json");
+					}
+					else
+					{
+						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
+						Notification::create("Icon Pack succesfully created!", NotificationIcon::Success)->show();
+						log::debug("Pack.json succesfully written!");
+					}
+				}
+				else
+				{
+					Notification::create("Error while creating Pack Folder", NotificationIcon::Error)->show();
+					log::error("There was an error attempting to create the directory.");
+				}
+			}
+			else if (no)
+			{
+				auto warning = createQuickPopup(
+					"Set Folder",
+					"Please set a Texture Pack folder in the settings of the mod to download icons",
+					"Ok",
+					nullptr,
+					[](auto, auto) {});
+			}
+		});
+}
+
+/*
+void GalleryLayer::createTexturePack()
+{
+
+	auto directory = fmt::format("{}/packs", Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir());
+	auto test = std::filesystem::create_directories(fmt::format("{}/Icon Gallery", directory));
+
+	if (test)
+	{
+		auto json = matjson::makeObject({{"textureldr", "1.5.0"},
+										 {"name", "Downloaded Icons"},
+										 {"id", "icon_gallery.pack"},
+										 {"version", "1.0.0"},
+										 {"author", "Icon Gallery mod"}});
+
+		auto filePath = Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir() / "packs" / "Icon Gallery" / "pack.json";
+
+		if (!utils::file::writeString(filePath, json.dump()))
+		{
+			log::debug("There was an error creating the texture pack");
+		}
+		else
+		{
+			log::debug("Texture Pack succesfully created!");
+		}
+	}
+};*/
 
 void GalleryLayer::fetchGallery()
 {
@@ -242,6 +353,7 @@ void GalleryLayer::loadGallery()
 
 void GalleryLayer::refreshGallery()
 {
+	m_page = 0;
 	fetchGallery();
 }
 

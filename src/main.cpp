@@ -35,10 +35,10 @@ class $modify(GarageLayer, GJGarageLayer)
 	}
 };
 
-$execute{
-	listenForAllSettingChanges([](const std::string_view key, std::shared_ptr<SettingV3> setting){
+$execute
+{
+	listenForSettingChanges<std::string>("sort-order", [](std::string value){ 
 		if(auto layer = static_cast<GalleryLayer *>(CCScene::get()->getChildByID("icon-gallery-layer"))){
 			layer->refreshGallery();
-		};
-	});
+		} });
 };

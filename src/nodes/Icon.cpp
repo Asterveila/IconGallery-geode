@@ -3,13 +3,13 @@
 
 IconFormat formatFromString(std::string format)
 {
-	log::debug("CHECKING STRING FORMAT");
-
+	//	If the string says "Vanilla"
 	if (std::string_view(format) == std::string_view("Vanilla"))
 	{
 		return IconFormat::Vanilla;
 	};
 
+	//	Self-explanatory
 	return IconFormat::MoreIcons;
 }
 
@@ -81,28 +81,34 @@ void Icon::downloadIcon()
 					isDownloadSuccesful = true;
 					isDownloading = false;
 
-					m_zipfile = Mod::get()->getConfigDir() / test;
-
-					log::debug("Download completed");
-
 					if (m_iconCell)
 					{
 						log::debug("Cell Called");
 						m_iconCell->updateDownload();
 					}
 
-					auto popup = createQuickPopup(
-						"Icon Downloaded!",
-						"Do you want to unzip the files of the icon? (Note: This is still experimental and could crash)",
-						"No",
-						"Yes",
-						[this](auto, bool btn)
-						{
-							if (btn)
+					m_zipfile = Mod::get()->getConfigDir() / test;
+
+					//	Next phase, unpack the icon
+					if (Mod::get()->getSettingValue<bool>("auto-unzip"))
+					{
+						unpackIcon();
+					}
+					else
+					{
+						auto popup = createQuickPopup(
+							"Icon Downloaded!",
+							"Do you want to unzip the files of the icon? (Note: This is still experimental and could crash)",
+							"No",
+							"Yes",
+							[this](auto, bool btn)
 							{
-								unpackIcon();
-							}
-						});
+								if (btn)
+								{
+									unpackIcon();
+								}
+							});
+					}
 				};
 			}
 			else
@@ -115,15 +121,7 @@ void Icon::downloadIcon()
 
 void Icon::unpackIcon()
 {
-	log::debug("EXISTS? {}", std::filesystem::exists(m_zipfile));
-	log::debug("PATH {}", m_zipfile);
-
-	if (!std::filesystem::exists(m_zipfile))
-	{
-		Notification::create("There was an error...", NotificationIcon::Error)->show();
-		log::error("ZIP file not found");
-		return;
-	}
+	auto path = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder");
 
 	std::vector<std::string> gamemodeFile = {
 		"icon",
@@ -138,7 +136,7 @@ void Icon::unpackIcon()
 
 	auto gamemode = gamemodeFile[(int)m_gamemode];
 	auto zipfilePath = m_zipfile;
-	auto unzipDir = Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir() / gamemode;
+	auto unzipDir = m_format == IconFormat::MoreIcons ? path / "config" / "hiimjustin000.more_icons" / gamemode : path / "icons";
 	auto result = utils::file::Unzip::intoDir(zipfilePath, unzipDir, true);
 
 	auto popup = createQuickPopup(

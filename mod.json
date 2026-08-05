@@ -8,12 +8,15 @@
 	},
 	"id": "ml5.icon-gallery",
 	"name": "Icon Gallery",
-	"version": "v1.0.0-alpha.2",
-	"developer": "ML500",
+	"version": "v1.0.0-alpha.3",
+	"developers": [
+		"ML500", "Asterveila"
+	],
 	"description": "Sariah's Icon Gallery website now in GD!",
 	"dependencies": {
 		"geode.node-ids": ">=v1.23.3",
-		"hiimjustin000.more_icons": ">=v2.1.0"
+		"hiimjustin000.more_icons": ">=v2.1.0",
+		"geode.texture-loader": ">=1.10.0"
 	},
 	"settings": {
 		"sort-order": {
@@ -24,6 +27,22 @@
 				"Most Downloaded"
 			],
 			"default": "Most Downloaded"
+		},
+		"auto-unzip": {
+			"type": "bool",
+			"name": "Unzip automatically",
+			"description": "Disables the alert and the mod goes straight into unzipping the sprites from downloaded Zip packages.",
+			"default": false
+		},
+		"path-settings": {
+			"type": "title",
+			"name": "Folder Settings"
+		},
+		"icon-pack-folder": {
+			"type": "folder",
+			"name": "Icons Pack Folder",
+			"description": "It's the folder location where downloaded icons will be placed (after unzipping). It's heavily recommended to be a pack from <cg>Texture Loader</c>.\n***\nThe mod will create a pack folder if no custom one is provided.",
+			"default": ""
 		}
 	},
 	"resources": {
@@ -33,7 +52,7 @@
 	},
 	"tags": [
 		"interface",
-		"online",
-		"utility"
+		"utility",
+		"online"
 	]
 }
