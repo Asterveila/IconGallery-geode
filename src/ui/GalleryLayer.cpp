@@ -93,8 +93,9 @@ bool GalleryLayer::init()
 		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
 		this,
 		menu_selector(GalleryLayer::onFindPage));
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
 	m_pagesBtn->setVisible(false);
+	m_pagesBtn->setID("pages-button");
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
@@ -103,16 +104,33 @@ bool GalleryLayer::init()
 		settingsSpr,
 		this,
 		menu_selector(GalleryLayer::onSettings));
+	settingsBtn->setID("settings-button");
 	buttonMenu->addChildAtPosition(settingsBtn, Anchor::BottomLeft, ccp(30, 30), false);
 
 	auto folderBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_folderBtn_001.png"),
+		CircleButtonSprite::createWithSpriteFrameName("gj_folderBtn_001.png", 1, CircleBaseColor::Green, CircleBaseSize::SmallAlt),
 		this,
 		menu_selector(GalleryLayer::onFolder));
-	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomRight, ccp(-30, 30), false);
+	folderBtn->setID("folder-button");
+	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
+
+	auto discordBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
+		this,
+		menu_selector(GalleryLayer::onDiscord));
+	discordBtn->setID("discord-button");
+	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-30, 70), false);
+
+	auto websiteBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::create("WebsiteIcon.png"_spr),
+		this,
+		menu_selector(GalleryLayer::onWebsite));
+	websiteBtn->setID("website-button");
+	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-30, 30), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({356, 220});
+	m_scrollLayer->setID("scroll-layer");
 	m_scrollLayer->setZOrder(-2);
 	this->addChildAtPosition(m_scrollLayer, Anchor::Center, ccp(-178, -110), false);
 
@@ -142,26 +160,11 @@ bool GalleryLayer::init()
 	return true;
 };
 
-/*
-void GalleryLayer::showPackPopup()
-{
-	auto popup = createQuickPopup(
-		"No Texture Pack Found",
-		"Icons downloaded from here are saved in a Texture Pack. Do you want to make it? (Note: this is to avoid overwriting existing icons)",
-		"No",
-		"Yes",
-		[this](auto, bool btn)
-		{
-			if (btn)
-			{
-				createTexturePack();
-			}
-		});
-}
-*/
-
 void GalleryLayer::setupIconPack()
 {
+	if (Mod::get()->getSettingValue<bool>("more-icons-folder"))
+		return;
+
 	auto popup = createQuickPopup(
 		"No Icon Pack found",
 		"Icons downloaded from here are saved in a Texture Pack. Do you want to make one? (Note: This is to avoid overwritting existing icons)",
@@ -213,34 +216,6 @@ void GalleryLayer::setupIconPack()
 			}
 		});
 }
-
-/*
-void GalleryLayer::createTexturePack()
-{
-
-	auto directory = fmt::format("{}/packs", Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir());
-	auto test = std::filesystem::create_directories(fmt::format("{}/Icon Gallery", directory));
-
-	if (test)
-	{
-		auto json = matjson::makeObject({{"textureldr", "1.5.0"},
-										 {"name", "Downloaded Icons"},
-										 {"id", "icon_gallery.pack"},
-										 {"version", "1.0.0"},
-										 {"author", "Icon Gallery mod"}});
-
-		auto filePath = Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir() / "packs" / "Icon Gallery" / "pack.json";
-
-		if (!utils::file::writeString(filePath, json.dump()))
-		{
-			log::debug("There was an error creating the texture pack");
-		}
-		else
-		{
-			log::debug("Texture Pack succesfully created!");
-		}
-	}
-};*/
 
 void GalleryLayer::fetchGallery()
 {
@@ -324,15 +299,15 @@ void GalleryLayer::loadGallery()
 	{
 		auto iconData = value;
 
-		Icon *newIcon = Icon::createIcon(
+		Icon *newIcon = Icon::create(
 			iconData["iconName"].asString().unwrap(),
 			iconData["author"].asString().unwrap(),
 			iconData["filename"].asString().unwrap(),
 			iconData["previewUrl"].asString().unwrap(),
 			iconData["gamemode"].asInt().unwrap(),
-			iconData["description"].asString().unwrapOr(""),
 			iconData["downloads"].asInt().unwrapOr(0),
-			iconData["format"].asString().unwrapOr("More Icons"));
+			iconData["description"].asString().unwrapOr(""),
+			iconData["format"].asString().unwrapOr(""));
 
 		icons.push_back(newIcon);
 
@@ -371,12 +346,22 @@ void GalleryLayer::createModeButton(int tag, bool active)
 		"swing",
 		"jetpack"};
 
-	auto m_button = CCMenuItemToggler::createWithSize(
+	CCMenuItemToggler *m_button = CCMenuItemToggler::createWithSize(
 		fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str(),
 		fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str(),
 		this,
 		menu_selector(GalleryLayer::onNavButton),
 		0.9);
+
+	if (tag == 0)
+	{
+		m_button = CCMenuItemToggler::createWithSize(
+			"AllModesOff.png"_spr,
+			"AllModesOn.png"_spr,
+			this,
+			menu_selector(GalleryLayer::onNavButton),
+			0.9);
+	}
 
 	m_button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
 	m_button->toggle(active);
@@ -456,13 +441,17 @@ void GalleryLayer::createModeButton(int tag, bool active)
 
 void GalleryLayer::onNavButton(CCObject *sender)
 {
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
+
 	auto tag = sender->getTag();
-	auto m_prevBtn = m_activeBtn;
+	auto m_prevModeBtn = m_activeBtn;
 	m_activeBtn = tag;
 
 	log::debug("Tag = {}", tag);
 
-	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevBtn)))
+	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevModeBtn)))
 	{
 		oldButton->toggle(false);
 	}
@@ -504,6 +493,10 @@ void GalleryLayer::onNavButton(CCObject *sender)
 
 void GalleryLayer::onPage(CCObject *sender)
 {
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
+
 	m_page += sender->getTag();
 	fetchGallery();
 }
@@ -526,11 +519,17 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 
 	log::debug("Changed Page = {}", value);
 
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
+
+	//	Page changed
 	int newPage = value;
 	if (m_page == newPage - 1)
 		return;
 
 	m_page = newPage - 1;
+
 	fetchGallery();
 };
 
@@ -542,6 +541,16 @@ void GalleryLayer::onSettings(CCObject *)
 void GalleryLayer::onFolder(CCObject *)
 {
 	utils::file::openFolder(Mod::get()->getConfigDir());
+}
+
+void GalleryLayer::onDiscord(CCObject *)
+{
+	CCApplication::sharedApplication()->openURL("https://discord.gg/dceY3uvGzD");
+}
+
+void GalleryLayer::onWebsite(CCObject *)
+{
+	CCApplication::sharedApplication()->openURL("https://iconsgallery.pages.dev/");
 }
 
 void GalleryLayer::onBack(CCObject *)

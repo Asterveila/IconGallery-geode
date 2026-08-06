@@ -54,6 +54,8 @@ public:
 	void onFindPage(CCObject *sender);
 	void onSettings(CCObject *sender);
 	void onNavButton(CCObject *sender);
+	void onWebsite(CCObject *sender);
+	void onDiscord(CCObject *sender);
 
 	void refreshGallery();
 	// void showPackPopup();

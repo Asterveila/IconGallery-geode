@@ -10,7 +10,8 @@
 	"name": "Icon Gallery",
 	"version": "v1.0.0-alpha.3",
 	"developers": [
-		"ML500", "Asterveila"
+		"ML500",
+		"Asterveila"
 	],
 	"description": "Sariah's Icon Gallery website now in GD!",
 	"dependencies": {
@@ -28,20 +29,42 @@
 			],
 			"default": "Most Downloaded"
 		},
-		"auto-unzip": {
-			"type": "bool",
-			"name": "Unzip automatically",
-			"description": "Disables the alert and the mod goes straight into unzipping the sprites from downloaded Zip packages.",
-			"default": false
+		"unzip-settings": {
+			"type": "title",
+			"name": "Unpackaging Settings"
 		},
-		"path-settings": {
+		"auto-unpack": {
+			"type": "bool",
+			"name": "Automatic unpacking",
+			"description": "Icons you download from the gallery will be extracted and added right away in the designated icons folder.\n***\nWhen this is disabled, you will get an alert to chose to unpack the icon or not.",
+			"default": true
+		},
+		"delete-zips": {
+			"type": "bool",
+			"name": "Delete ZIP Packs",
+			"description": "After an icon gets unpacked, the mod automatically deletes the ZIP package.\n***\nThis allows you to disable that feature.",
+			"default": true
+		},
+		"folder-settings": {
 			"type": "title",
 			"name": "Folder Settings"
+		},
+		"resources-folder": {
+			"type": "bool",
+			"name": "Use Resources Folder",
+			"description": "<cgVanilla</c> Icons would be extracted and added the main game's resources folder.\n***\nDo not enable it if you don't want to replace the original icons.",
+			"default": false
+		},
+		"more-icons-folder": {
+			"type": "bool",
+			"name": "Use More Icons folder",
+			"description": "<cy>ALL</c> icons (includes Vanilla) downloaded from the gallery will be extracted and added in the More Icons folders.\n***\nBe aware you could overwrite existing ones.",
+			"default": false
 		},
 		"icon-pack-folder": {
 			"type": "folder",
 			"name": "Icons Pack Folder",
-			"description": "It's the folder location where downloaded icons will be placed (after unzipping). It's heavily recommended to be a pack from <cg>Texture Loader</c>.\n***\nThe mod will create a pack folder if no custom one is provided.",
+			"description": "If none of the settings above are active, all the icons downloaded from the gallery will be extracted to a custom texture pack the mod creates at start-up.\n***\nYou can also put a custom pack location to where the icons will end up too.",
 			"default": ""
 		}
 	},

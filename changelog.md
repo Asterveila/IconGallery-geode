@@ -1,15 +1,24 @@
 # Changelog
 
-### v1.0.0-alpha.3 (Latest)
+### <cy>v1.0.0-alpha.3</c> (Latest)
 
-*To be written*
+* Massive Overhaul
+* New Icon Pack system (experimental).
+* New unpacking system (still experimental).
+* <cg>Added</c> warning when overwriting icons.
+* <cg>Added</c> custom folder location setting.
+* <cg>Added</c> more location settings.
+* <cg>Added</c> unpacking settings.
+* <cg>Added</c> links to gallery and discord.
+* <cy>Fixed?</c> visual bugs when downloading icons.
+* <cy>Fixed</c> bug when changing pages.
+* Removed Monster.
 
-### v1.0.0-alpha.2
+### <co>v1.0.0-alpha.2</c>
 
-* Re-written code, hopefully to fix major crash.
-* Re-written code, so the sprites of buttons are now the in-game ones.
-* Temporally disabled the automatic fetching of the gallery.
+* <cg>Changed</c> button sprites to the in-game ones.
+* <cy>Fixed</c> major crash on start-up.
 
-### v1.0.0-alpha.1
+### <co>v1.0.0-alpha.1</c>
 
-* First Alpha release.
+* First Alpha release for private testing.

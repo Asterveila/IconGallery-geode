@@ -8,7 +8,7 @@ bool IconCell::init(Icon *icon, bool even)
 	}
 
 	m_icon = icon;
-	m_icon->m_iconCell = this;
+	m_icon->m_cell = this;
 	this->setContentSize(m_size);
 
 	//	Background of the Cell
@@ -135,11 +135,11 @@ bool IconCell::init(Icon *icon, bool even)
 	m_icon->m_downloadBar->m_touchLogic->setVisible(false);
 	m_icon->m_downloadBar->m_groove->setPosition({m_size.width / 2, 7.5});
 
-	updateDownload();
+	updateStatus();
 	return true;
 }
 
-void IconCell::updateDownload()
+void IconCell::updateStatus()
 {
 	if (!m_icon)
 		return;
@@ -252,7 +252,7 @@ void IconCell::onDownload(CCObject *)
 			if (btn)
 			{
 				m_icon->downloadIcon();
-				updateDownload();
+				updateStatus();
 			}
 		});
 }

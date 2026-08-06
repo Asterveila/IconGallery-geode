@@ -1,5 +1,6 @@
 #pragma once
 #include <Geode/Geode.hpp>
+#include <Geode/loader/Dirs.hpp>
 
 using namespace geode::prelude;
 
@@ -14,34 +15,31 @@ enum IconFormat
 class Icon : public CCObject
 {
 public:
-	IconCell * m_iconCell = nullptr;
+	IconCell *m_cell = nullptr;
 
 	std::string m_name;
 	std::string m_author;
-	std::string m_description;
 	std::string m_fileName;
+	std::string m_description;
 	std::string m_previewURL;
-
-	int m_downloads;
-	bool m_hasProjectFiles;
-
 	IconType m_gamemode;
 	IconFormat m_format;
+	int m_downloads;
 
+	std::filesystem::path m_zipPath;
 	std::vector<std::string> m_collaborators = {};
-	std::filesystem::path m_zipfile = "";
-
-	//	Something
-	Slider * m_downloadBar = nullptr;
 
 	//	Creating and adding data
-	static Icon *createIcon(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, std::string desc = "", int downloads = 0, std::string format = "Vanilla");
-	void addCollaborators(std::vector<std::string> collab);
+	static Icon *create(std::string name, std::string author, std::string filename, std::string previewURL, int gamemode, int downloads = 0, std::string desc = "", std::string format = "More Icons");
+	void addCollab(std::vector<std::string> contributors);
 
 	//	Downloading Processes
-	void downloadIcon();
 	bool isDownloading = false;
 	bool isDownloadSuccesful = false;
+
+	Slider *m_downloadBar = nullptr;
 	TaskHolder<geode::utils::web::WebResponse> m_listener;
+
+	void downloadIcon();
 	void unpackIcon();
 };
