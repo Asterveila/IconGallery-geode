@@ -1,12 +1,21 @@
-# ICON GALLERY (Geode Mod Version)
+# Icon Gallery (Geode Version)
 
 This is the repository for the Geode version of [Asterveila's](https://github.com/Asterveila) [Icon Gallery Website](https://github.com/Asterveila/IconGallery), where you can download and install Icons within the game.
 
+The Icon Gallery is a website made to act as a museum of custom-made icons people can download and install in their games. This is a Geode mod that ports the website to Geometry Dash, where people can install icons with ease.
+
+This mod is still in active development, where things are prone to changes, more features to come and bugs to happen.
+
 ## To-do List
 
-Quite a lot, since this code is still a work in progress, heavily prone to changes. Be aware that bugs and crashes are prone to happen (specially on alpha or beta builds).
+- Searching features.
+- Author-based filtering.
+- Sorting by icon names or authors.
+- Custom visuals (since we just took the shop).
+- If you got any suggestions, feel to create an issue.
 
-### Credits
+## Credits
 
-- The code behind this mod is heavily based/modified from the [Texture's Workshops source code](https://github.com/Uproxide/Texture-Workshop) made by [Uproxide](https://github.com/Uproxide) and it's collaborators.
-- This mod is a port of [Asterveila's](https://github.com/Asterveila) Icon Gallery website.
+- [Asterveila](https://github.com/Asterveila) - Host of the website.
+- [ML500](https://github.com/MasterL500) - Main mod developer.
+- [Uproxide](https://github.com/Uproxide) & More - Giving me permission to use code of the Texture Workshop, which made this mod happen :)

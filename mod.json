@@ -74,6 +74,10 @@
 			"default": ""
 		}
 	},
+	"links": {
+		"community": "https://discord.gg/dceY3uvGzD",
+		"homepage": "https://iconsgallery.pages.dev/"
+	},
 	"resources": {
 		"sprites": [
 			"resources/*.png"

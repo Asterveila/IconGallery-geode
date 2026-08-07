@@ -1,6 +1,11 @@
 # Changelog
 
-### <cy>v1.0.0-alpha.3</c> (Latest)
+### <cy>v1.0.0-alpha.4</c> (Latest)
+
+* <cg>Added</c> custom button for the gallery.
+* <cy>Fixed</c> visual bug in lower resolutions.
+
+### <co>v1.0.0-alpha.3</c>
 
 * Massive Overhaul
 * New Icon Pack system (experimental).

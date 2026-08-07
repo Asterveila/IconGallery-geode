@@ -14,7 +14,7 @@ class $modify(GarageLayer, GJGarageLayer)
 		auto menu = CCMenu::create();
 		menu->setID("icon-gallery-menu");
 		menu->setZOrder(2);
-		this->addChildAtPosition(menu, Anchor::BottomLeft, ccp(40, 40), false);
+		this->addChildAtPosition(menu, Anchor::BottomLeft, ccp(32, 32), false);
 
 		auto spr = CrossButtonSprite::createWithSprite("GalleryIcon.png"_spr, 0.9f);
 		spr->setScale(0.75f);
