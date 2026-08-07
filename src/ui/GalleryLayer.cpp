@@ -28,9 +28,10 @@ bool GalleryLayer::init()
 	auto title = CCSprite::create("GalleryLabel.png"_spr);
 	addChildAtPosition(title, Anchor::Top, ccp(0, -30), false);
 
+	//	Page Numbering
 	m_pageLabel = CCLabelBMFont::create("", "goldFont.fnt");
 	m_pageLabel->limitLabelWidth(200.0f, 0.5f, 0.5f);
-	m_pageLabel->setAnchorPoint({1, 0.5});
+	m_pageLabel->setAnchorPoint({1, 1});
 	m_pageLabel->setVisible(false);
 	addChildAtPosition(m_pageLabel, Anchor::TopRight, ccp(-10, -10), false);
 
@@ -47,6 +48,7 @@ bool GalleryLayer::init()
 	backBtn->setSizeMult(1.2f);
 	backMenu->addChild(backBtn);
 
+	//	Pages Menu
 	m_pagesMenu = CCMenu::create();
 	m_pagesMenu->setID("pages-menu");
 	addChildAtPosition(m_pagesMenu, Anchor::BottomLeft, ccp(0, 0), false);
@@ -62,7 +64,6 @@ bool GalleryLayer::init()
 
 	auto nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 	nextSpr->setFlipX(true);
-
 	m_nextBtn = CCMenuItemSpriteExtra::create(
 		nextSpr,
 		this,
@@ -77,10 +78,10 @@ bool GalleryLayer::init()
 	//	Gamemodes Menu
 	m_modesMenu = CCMenu::create();
 	m_modesMenu->setID("gamemodes-menu");
-	m_modesMenu->setLayout(RowLayout::create()
-							   ->setGap(2.f));
+	m_modesMenu->setLayout(RowLayout::create()->setGap(2.5f));
 	addChildAtPosition(m_modesMenu, Anchor::Bottom, ccp(0, 30), false);
 
+	//	Creates the buttons
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
@@ -95,7 +96,7 @@ bool GalleryLayer::init()
 		menu_selector(GalleryLayer::onFindPage));
 	m_pagesBtn->setVisible(false);
 	m_pagesBtn->setID("pages-button");
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -40), false);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
@@ -119,14 +120,14 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onDiscord));
 	discordBtn->setID("discord-button");
-	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-30, 70), false);
+	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-20, 55), false);
 
 	auto websiteBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::create("WebsiteIcon.png"_spr),
 		this,
 		menu_selector(GalleryLayer::onWebsite));
 	websiteBtn->setID("website-button");
-	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-30, 30), false);
+	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-20, 20), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({356, 220});
@@ -311,7 +312,8 @@ void GalleryLayer::loadGallery()
 
 		//	If there's data of collaborators
 		auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
-		if(!collab.empty()){
+		if (!collab.empty())
+		{
 			newIcon->addCollab(collab);
 		}
 
