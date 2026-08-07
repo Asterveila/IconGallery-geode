@@ -20,5 +20,5 @@ public:
 
 	void onDownload(CCObject *);
 	void onInfo(CCObject *);
-	void updateDownload();
+	void updateStatus();
 };

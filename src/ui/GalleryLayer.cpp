@@ -28,9 +28,10 @@ bool GalleryLayer::init()
 	auto title = CCSprite::create("GalleryLabel.png"_spr);
 	addChildAtPosition(title, Anchor::Top, ccp(0, -30), false);
 
+	//	Page Numbering
 	m_pageLabel = CCLabelBMFont::create("", "goldFont.fnt");
 	m_pageLabel->limitLabelWidth(200.0f, 0.5f, 0.5f);
-	m_pageLabel->setAnchorPoint({1, 0.5});
+	m_pageLabel->setAnchorPoint({1, 1});
 	m_pageLabel->setVisible(false);
 	addChildAtPosition(m_pageLabel, Anchor::TopRight, ccp(-10, -10), false);
 
@@ -47,6 +48,7 @@ bool GalleryLayer::init()
 	backBtn->setSizeMult(1.2f);
 	backMenu->addChild(backBtn);
 
+	//	Pages Menu
 	m_pagesMenu = CCMenu::create();
 	m_pagesMenu->setID("pages-menu");
 	addChildAtPosition(m_pagesMenu, Anchor::BottomLeft, ccp(0, 0), false);
@@ -62,7 +64,6 @@ bool GalleryLayer::init()
 
 	auto nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 	nextSpr->setFlipX(true);
-
 	m_nextBtn = CCMenuItemSpriteExtra::create(
 		nextSpr,
 		this,
@@ -77,10 +78,10 @@ bool GalleryLayer::init()
 	//	Gamemodes Menu
 	m_modesMenu = CCMenu::create();
 	m_modesMenu->setID("gamemodes-menu");
-	m_modesMenu->setLayout(RowLayout::create()
-							   ->setGap(2.f));
+	m_modesMenu->setLayout(RowLayout::create()->setGap(2.5f));
 	addChildAtPosition(m_modesMenu, Anchor::Bottom, ccp(0, 30), false);
 
+	//	Creates the buttons
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
@@ -93,8 +94,9 @@ bool GalleryLayer::init()
 		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
 		this,
 		menu_selector(GalleryLayer::onFindPage));
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-30, -40), false);
 	m_pagesBtn->setVisible(false);
+	m_pagesBtn->setID("pages-button");
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -40), false);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
@@ -103,16 +105,33 @@ bool GalleryLayer::init()
 		settingsSpr,
 		this,
 		menu_selector(GalleryLayer::onSettings));
+	settingsBtn->setID("settings-button");
 	buttonMenu->addChildAtPosition(settingsBtn, Anchor::BottomLeft, ccp(30, 30), false);
 
 	auto folderBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_folderBtn_001.png"),
+		CircleButtonSprite::createWithSpriteFrameName("gj_folderBtn_001.png", 1, CircleBaseColor::Green, CircleBaseSize::SmallAlt),
 		this,
 		menu_selector(GalleryLayer::onFolder));
-	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomRight, ccp(-30, 30), false);
+	folderBtn->setID("folder-button");
+	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
+
+	auto discordBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
+		this,
+		menu_selector(GalleryLayer::onDiscord));
+	discordBtn->setID("discord-button");
+	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-20, 55), false);
+
+	auto websiteBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::create("WebsiteIcon.png"_spr),
+		this,
+		menu_selector(GalleryLayer::onWebsite));
+	websiteBtn->setID("website-button");
+	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-20, 20), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({356, 220});
+	m_scrollLayer->setID("scroll-layer");
 	m_scrollLayer->setZOrder(-2);
 	this->addChildAtPosition(m_scrollLayer, Anchor::Center, ccp(-178, -110), false);
 
@@ -122,7 +141,18 @@ bool GalleryLayer::init()
 	m_loading->setVisible(false);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
-	//	fetchGallery();
+	//	If there's no "Icon Pack" settled (via settings), creates one.
+	auto noPackExists = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty();
+	if (noPackExists)
+	{
+		this->runAction(CCSequence::create(
+			CCDelayTime::create(1.f),
+			CCCallFunc::create(this, callfunc_selector(GalleryLayer::setupIconPack)),
+			0));
+	};
+
+	//	Calls teh function to fetch the Gallery.
+	fetchGallery();
 
 	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
@@ -130,6 +160,63 @@ bool GalleryLayer::init()
 	this->setID("icon-gallery-layer");
 	return true;
 };
+
+void GalleryLayer::setupIconPack()
+{
+	if (Mod::get()->getSettingValue<bool>("more-icons-folder"))
+		return;
+
+	auto popup = createQuickPopup(
+		"No Icon Pack found",
+		"Icons downloaded from here are saved in a Texture Pack. Do you want to make one? (Note: This is to avoid overwritting existing icons)",
+		"No",
+		"Yes",
+		[this](bool no, bool yes)
+		{
+			//	If yes, creates the directory
+			if (yes)
+			{
+				auto directory = Loader::get()->getInstalledMod("geode.texture-loader")->getConfigDir() / "packs";
+
+				if (std::filesystem::create_directories(directory / "Icon Gallery"))
+				{
+					auto json = matjson::makeObject({{"textureldr", "1.5.0"},
+													 {"name", "Downloaded Icons"},
+													 {"id", "icon_gallery.pack"},
+													 {"version", "1.0.0"},
+													 {"author", "Icon Gallery mod"}});
+
+					auto packPath = directory / "Icon Gallery";
+
+					if (!utils::file::writeString(packPath / "pack.json", json.dump()))
+					{
+						Notification::create("Error while creating the pack.json", NotificationIcon::Error)->show();
+						log::error("There was an error creating the Pack.json");
+					}
+					else
+					{
+						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
+						Notification::create("Icon Pack succesfully created!", NotificationIcon::Success)->show();
+						log::debug("Pack.json succesfully written!");
+					}
+				}
+				else
+				{
+					Notification::create("Error while creating Pack Folder", NotificationIcon::Error)->show();
+					log::error("There was an error attempting to create the directory.");
+				}
+			}
+			else if (no)
+			{
+				auto warning = createQuickPopup(
+					"Set Folder",
+					"Please set a Texture Pack folder in the settings of the mod to download icons",
+					"Ok",
+					nullptr,
+					[](auto, auto) {});
+			}
+		});
+}
 
 void GalleryLayer::fetchGallery()
 {
@@ -213,15 +300,22 @@ void GalleryLayer::loadGallery()
 	{
 		auto iconData = value;
 
-		Icon *newIcon = Icon::createIcon(
+		Icon *newIcon = Icon::create(
 			iconData["iconName"].asString().unwrap(),
 			iconData["author"].asString().unwrap(),
 			iconData["filename"].asString().unwrap(),
 			iconData["previewUrl"].asString().unwrap(),
 			iconData["gamemode"].asInt().unwrap(),
-			iconData["description"].asString().unwrapOr(""),
 			iconData["downloads"].asInt().unwrapOr(0),
-			iconData["format"].asString().unwrapOr("More Icons"));
+			iconData["description"].asString().unwrapOr(""),
+			iconData["format"].asString().unwrapOr(""));
+
+		//	If there's data of collaborators
+		auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
+		if (!collab.empty())
+		{
+			newIcon->addCollab(collab);
+		}
 
 		icons.push_back(newIcon);
 
@@ -242,6 +336,7 @@ void GalleryLayer::loadGallery()
 
 void GalleryLayer::refreshGallery()
 {
+	m_page = 0;
 	fetchGallery();
 }
 
@@ -259,12 +354,18 @@ void GalleryLayer::createModeButton(int tag, bool active)
 		"swing",
 		"jetpack"};
 
-	auto m_button = CCMenuItemToggler::createWithSize(
-		fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str(),
-		fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str(),
+	//	The sprites
+	auto inactiveSpr = tag == 0 ? CCSprite::create("AllModesOff.png"_spr) : CCSprite::createWithSpriteFrameName(fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str());
+	auto activeSpr = tag == 0 ? CCSprite::create("AllModesOn.png"_spr) : CCSprite::createWithSpriteFrameName(fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str());
+	inactiveSpr->setScale(0.9f);
+	activeSpr->setScale(0.9f);
+
+	//	The button
+	auto *m_button = CCMenuItemToggler::create(
+		inactiveSpr,
+		activeSpr,
 		this,
-		menu_selector(GalleryLayer::onNavButton),
-		0.9);
+		menu_selector(GalleryLayer::onNavButton));
 
 	m_button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
 	m_button->toggle(active);
@@ -273,84 +374,18 @@ void GalleryLayer::createModeButton(int tag, bool active)
 	//  Adds button to menu and updates layout.
 	m_modesMenu->addChild(m_button);
 	m_modesMenu->updateLayout();
-
-	/*
-	std::vector<const char *> sprites = {
-		"GamemodeAll.png"_spr,
-		"GamemodeCube.png"_spr,
-		"GamemodeShip.png"_spr,
-		"GamemodeBall.png"_spr,
-		"GamemodeUFO.png"_spr,
-		"GamemodeWave.png"_spr,
-		"GamemodeRobot.png"_spr,
-		"GamemodeSpider.png"_spr,
-		"GamemodeSwing.png"_spr,
-		"GamemodeJetpack.png"_spr,
-	};
-
-	const char *spriteName = "gj_streakBtn_off_001.png";
-	const char *mode = active ? "on" : "off";
-
-	std::vector<const char *> gamemodes = {
-		"all",
-		"icon",
-		"ship",
-		"ball",
-		"bird",
-		"dart",
-		"robot",
-		"spider",
-		"swing",
-		"jetpack"};
-
-	if (tag != 0)
-	{
-		spriteName = fmt::format("gj_{}Btn_{}_001.png", gamemodes[tag], mode).c_str();
-		auto buttonSpr = CCSprite::createWithSpriteFrameName(spriteName);
-
-		//  Button
-		auto button = CCMenuItemSpriteExtra::create(
-			buttonSpr,
-			this,
-			menu_selector(GalleryLayer::onNavButton));
-		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
-		button->setTag(tag);
-
-		//  Adds button to menu and updates layout.
-		m_modesMenu->addChild(button);
-		m_modesMenu->updateLayout();
-	}
-	else
-	{
-		//  Base color based on whenever the current page is on
-		auto buttonColor = (active) ? IconSelectBaseColor::Selected : IconSelectBaseColor::Unselected;
-		auto buttonSpr = IconSelectButtonSprite::createWithSprite(sprites[tag], 1.75f, buttonColor);
-		buttonSpr->setScale(0.9f);
-
-		//  Button
-		auto button = CCMenuItemSpriteExtra::create(
-			buttonSpr,
-			this,
-			menu_selector(GalleryLayer::onNavButton));
-		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
-		button->setTag(tag);
-
-		//  Adds button to menu and updates layout.
-		m_modesMenu->addChild(button);
-		m_modesMenu->updateLayout();
-	};
-	*/
 };
 
 void GalleryLayer::onNavButton(CCObject *sender)
 {
 	auto tag = sender->getTag();
-	auto m_prevBtn = m_activeBtn;
+	auto m_prevModeBtn = m_activeBtn;
 	m_activeBtn = tag;
 
-	log::debug("Tag = {}", tag);
+	if (m_activeBtn == m_prevModeBtn)
+		return;
 
-	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevBtn)))
+	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevModeBtn)))
 	{
 		oldButton->toggle(false);
 	}
@@ -359,39 +394,19 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
 	m_page = 0;
 
-	fetchGallery();
-
-	/*
-	auto tag = sender->getTag();
-	auto m_prevBtn = m_activeBtn;
-	m_activeBtn = tag;
-
-	//  Updates the sprite of the button of the previous page
-	if (auto oldNavButton = static_cast<CCMenuItemSpriteExtra *>(m_modesMenu->getChildByTag(m_prevBtn)))
-	{
-		static_cast<CCSprite *>(oldNavButton->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName("geode.loader/baseIconSelect_Normal_Unselected.png"));
-		oldNavButton->updateSprite();
-		m_modesMenu->updateLayout();
-	}
-
-	//  Updates the sprite of the button for the current page
-	if (auto navButton = static_cast<CCMenuItemSpriteExtra *>(sender))
-	{
-		static_cast<CCSprite *>(navButton->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName("geode.loader/baseIconSelect_Normal_Selected.png"));
-		navButton->updateSprite();
-		m_modesMenu->updateLayout();
-	}
-
-	m_isFilterActive = tag != 0;
-	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
-	m_page = 0;
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
 
 	fetchGallery();
-	*/
 }
 
 void GalleryLayer::onPage(CCObject *sender)
 {
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
+
 	m_page += sender->getTag();
 	fetchGallery();
 }
@@ -414,11 +429,17 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 
 	log::debug("Changed Page = {}", value);
 
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
+
+	//	Page changed
 	int newPage = value;
 	if (m_page == newPage - 1)
 		return;
 
 	m_page = newPage - 1;
+
 	fetchGallery();
 };
 
@@ -430,6 +451,16 @@ void GalleryLayer::onSettings(CCObject *)
 void GalleryLayer::onFolder(CCObject *)
 {
 	utils::file::openFolder(Mod::get()->getConfigDir());
+}
+
+void GalleryLayer::onDiscord(CCObject *)
+{
+	CCApplication::sharedApplication()->openURL("https://discord.gg/dceY3uvGzD");
+}
+
+void GalleryLayer::onWebsite(CCObject *)
+{
+	CCApplication::sharedApplication()->openURL("https://iconsgallery.pages.dev/");
 }
 
 void GalleryLayer::onBack(CCObject *)

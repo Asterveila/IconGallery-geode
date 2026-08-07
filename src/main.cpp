@@ -11,9 +11,14 @@ class $modify(GarageLayer, GJGarageLayer)
 		if (!GJGarageLayer::init())
 			return false;
 
-		auto menu = this->getChildByID("shards-menu");
+		auto menu = CCMenu::create();
+		menu->setID("icon-gallery-menu");
+		menu->setZOrder(2);
+		this->addChildAtPosition(menu, Anchor::BottomLeft, ccp(32, 32), false);
 
-		auto spr = CircleButtonSprite::createWithSprite("dialogIcon_028.png", 1, CircleBaseColor::DarkPurple, CircleBaseSize::Small);
+		auto spr = CrossButtonSprite::createWithSprite("GalleryIcon.png"_spr, 0.9f);
+		spr->setScale(0.75f);
+	
 		auto button = CCMenuItemSpriteExtra::create(
 			spr,
 			this,
@@ -35,10 +40,10 @@ class $modify(GarageLayer, GJGarageLayer)
 	}
 };
 
-$execute{
-	listenForAllSettingChanges([](const std::string_view key, std::shared_ptr<SettingV3> setting){
+$execute
+{
+	listenForSettingChanges<std::string>("sort-order", [](std::string value){ 
 		if(auto layer = static_cast<GalleryLayer *>(CCScene::get()->getChildByID("icon-gallery-layer"))){
 			layer->refreshGallery();
-		};
-	});
+		} });
 };

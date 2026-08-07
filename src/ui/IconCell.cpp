@@ -3,13 +3,12 @@
 bool IconCell::init(Icon *icon, bool even)
 {
 	if (!CCLayer::init())
-	{
 		return false;
-	}
 
 	m_icon = icon;
-	m_icon->m_iconCell = this;
+	m_icon->m_cell = this;
 	this->setContentSize(m_size);
+	float scale = CCDirector::sharedDirector()->getContentScaleFactor() / 4;
 
 	//	Background of the Cell
 	auto m_background = CCLayerColor::create();
@@ -24,9 +23,9 @@ bool IconCell::init(Icon *icon, bool even)
 	else
 		m_background->setColor({161, 88, 44});
 
-	//	Preview
+	//	Preview the Icon
 	int attempts = 0;
-	m_preview = LazySprite::create({200, 200});
+	m_preview = LazySprite::create({160, 160});
 	m_preview->setLoadCallback(
 		[this, &attempts, icon](Result<> result)
 		{
@@ -44,8 +43,9 @@ bool IconCell::init(Icon *icon, bool even)
 				}
 			}
 		});
-	this->addChildAtPosition(m_preview, Anchor::Left, ccp(35, 0), false);
 	m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
+	m_preview->setScale(scale);
+	this->addChildAtPosition(m_preview, Anchor::Left, ccp(35, 0), false);
 
 	//	Name of the Icon
 	auto m_iconName = CCLabelBMFont::create(m_icon->m_name.c_str(), "bigFont.fnt");
@@ -53,32 +53,28 @@ bool IconCell::init(Icon *icon, bool even)
 	m_iconName->setAnchorPoint({0, 0.5});
 	this->addChildAtPosition(m_iconName, Anchor::Left, ccp(70, 15), false);
 
-	std::string authors = m_icon->m_author;
+	std::string author = fmt::format("By {}", m_icon->m_author);
+	log::debug("Is collab? = {}", !m_icon->m_collaborators.empty());
 
-	if (m_icon->m_collaborators.size() != 0)
+	if (!m_icon->m_collaborators.empty())
 	{
 		if (m_icon->m_collaborators.size() > 1)
 		{
-			authors = fmt::format("By {} and More", m_icon->m_author);
+			author = fmt::format("By {} and More", m_icon->m_author);
 		}
 		else
 		{
-			authors = fmt::format("By {} and {}", m_icon->m_author, m_icon->m_collaborators[0]);
+			author = fmt::format("By {} and {}", m_icon->m_author, m_icon->m_collaborators[0]);
 		}
 	};
 
 	//	Author of the Icon
-	auto m_iconAuthor = CCLabelBMFont::create(fmt::format("By {}", m_icon->m_author).c_str(), "goldFont.fnt");
+	auto m_iconAuthor = CCLabelBMFont::create(author.c_str(), "goldFont.fnt");
 	m_iconAuthor->setScale(0.5f);
 	m_iconAuthor->setAnchorPoint({0, 0.5});
 	this->addChildAtPosition(m_iconAuthor, Anchor::Left, ccp(70, 0), false);
 
-	//	Description
-	//	auto m_iconDesc = TextArea::create(m_icon->m_description.c_str(), "chatFont.fnt", 0.5f, 200.0f, {0, 0.5}, 10, true);
-	//	m_iconDesc->setAnchorPoint({0, 0.5});
-	//	m_iconDesc->setScale(0.5f);
-	//	this->addChildAtPosition(m_iconDesc, Anchor::Left, ccp(70, 0), false);
-
+	//	Download Count
 	auto m_downloadIcon = CCSprite::createWithSpriteFrameName("GJ_downloadsIcon_001.png");
 	m_downloadIcon->setScale(0.4f);
 	m_downloadIcon->setAnchorPoint({0, 0.5});
@@ -91,9 +87,11 @@ bool IconCell::init(Icon *icon, bool even)
 	m_downloadCount->setColor({100, 255, 100});
 	this->addChildAtPosition(m_downloadCount, Anchor::Left, ccp(82.5, -15), false);
 
+	//	Gamemode Label
 	auto m_gamemodeLabel = getGamemodeLabel(m_icon->m_gamemode);
 	this->addChildAtPosition(m_gamemodeLabel, Anchor::Left, ccp(m_downloadCount->getPositionX() + m_downloadCount->getScaledContentWidth() + 5, -15), false);
 
+	//	Format Label
 	const char *formatText = m_icon->m_format == IconFormat::Vanilla ? "Vanilla" : "More Icons";
 	auto m_formatLabel = CCLabelBMFont::create(formatText, "bigFont.fnt");
 	m_formatLabel->setAnchorPoint({0, 0.5});
@@ -138,11 +136,11 @@ bool IconCell::init(Icon *icon, bool even)
 	m_icon->m_downloadBar->m_touchLogic->setVisible(false);
 	m_icon->m_downloadBar->m_groove->setPosition({m_size.width / 2, 7.5});
 
-	updateDownload();
+	updateStatus();
 	return true;
 }
 
-void IconCell::updateDownload()
+void IconCell::updateStatus()
 {
 	if (!m_icon)
 		return;
@@ -184,7 +182,7 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 		break;
 
 	case IconType::Ball:
-		text = "Cube";
+		text = "Ball";
 		color = {255, 120, 120};
 		break;
 
@@ -195,7 +193,7 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 	case IconType::Wave:
 		text = "Wave";
-		color = {120, 180, 255};
+		color = {120, 220, 255};
 		break;
 
 	case IconType::Robot:
@@ -205,12 +203,12 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 	case IconType::Spider:
 		text = "Spider";
-		color = {190, 120, 255};
+		color = {180, 90, 255};
 		break;
 
 	case IconType::Swing:
 		text = "Swing";
-		color = {255, 255, 120};
+		color = {255, 255, 80};
 		break;
 
 	case IconType::Jetpack:
@@ -232,6 +230,19 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 void IconCell::onDownload(CCObject *)
 {
+	auto noPackExists = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty();
+	if (noPackExists)
+	{
+		auto warning = createQuickPopup(
+			"Set Folder",
+			"Please set a Texture Pack folder in the settings of the mod to download icons",
+			"Ok",
+			nullptr,
+			[](auto, auto) {});
+
+		return;
+	};
+
 	auto popup = createQuickPopup(
 		"Download Icon?",
 		"Are you sure you want to download <cy>" + m_icon->m_name + "</c>?",
@@ -242,7 +253,7 @@ void IconCell::onDownload(CCObject *)
 			if (btn)
 			{
 				m_icon->downloadIcon();
-				updateDownload();
+				updateStatus();
 			}
 		});
 }
