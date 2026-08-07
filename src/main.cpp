@@ -11,9 +11,14 @@ class $modify(GarageLayer, GJGarageLayer)
 		if (!GJGarageLayer::init())
 			return false;
 
-		auto menu = this->getChildByID("shards-menu");
+		auto menu = CCMenu::create();
+		menu->setID("icon-gallery-menu");
+		menu->setZOrder(2);
+		this->addChildAtPosition(menu, Anchor::BottomLeft, ccp(40, 40), false);
 
-		auto spr = CircleButtonSprite::createWithSprite("dialogIcon_028.png", 1, CircleBaseColor::DarkPurple, CircleBaseSize::Small);
+		auto spr = CrossButtonSprite::createWithSprite("GalleryIcon.png"_spr, 0.9f);
+		spr->setScale(0.75f);
+	
 		auto button = CCMenuItemSpriteExtra::create(
 			spr,
 			this,

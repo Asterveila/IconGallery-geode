@@ -8,12 +8,12 @@
 	},
 	"id": "ml5.icon-gallery",
 	"name": "Icon Gallery",
-	"version": "v1.0.0-alpha.3",
+	"version": "v1.0.0-alpha.4",
 	"developers": [
 		"ML500",
-		"Asterveila"
+		"Saritahhh"
 	],
-	"description": "Sariah's Icon Gallery website now in GD!",
+	"description": "Download and use community-made icons in GD!",
 	"dependencies": {
 		"geode.node-ids": ">=v1.23.3",
 		"hiimjustin000.more_icons": ">=v2.1.0",
@@ -52,13 +52,19 @@
 		"resources-folder": {
 			"type": "bool",
 			"name": "Use Resources Folder",
-			"description": "<cgVanilla</c> Icons would be extracted and added the main game's resources folder.\n***\nDo not enable it if you don't want to replace the original icons.",
+			"description": "<cg>Vanilla Icons</c> downloaded from the Gallery will be extracted and replace icons from the main game.\n***\n<cr>Do not enable it</c> if you don't want to replace the original icons.",
+			"platforms": [
+				"win",
+				"mac"
+			],
 			"default": false
 		},
 		"more-icons-folder": {
 			"type": "bool",
 			"name": "Use More Icons folder",
 			"description": "<cy>ALL</c> icons (includes Vanilla) downloaded from the gallery will be extracted and added in the More Icons folders.\n***\nBe aware you could overwrite existing ones.",
+			"enable-if": "loaded:hiimjustin000.more_icons",
+			"enable-if-description": "This option requires More Icons to be installed",
 			"default": false
 		},
 		"icon-pack-folder": {
@@ -74,8 +80,10 @@
 		]
 	},
 	"tags": [
+		"customization",
 		"interface",
 		"utility",
+		"content",
 		"online"
 	]
 }

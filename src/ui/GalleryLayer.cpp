@@ -309,6 +309,12 @@ void GalleryLayer::loadGallery()
 			iconData["description"].asString().unwrapOr(""),
 			iconData["format"].asString().unwrapOr(""));
 
+		//	If there's data of collaborators
+		auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
+		if(!collab.empty()){
+			newIcon->addCollab(collab);
+		}
+
 		icons.push_back(newIcon);
 
 		IconCell *cell = IconCell::create(newIcon, ii % 2 == 0);
@@ -346,22 +352,18 @@ void GalleryLayer::createModeButton(int tag, bool active)
 		"swing",
 		"jetpack"};
 
-	CCMenuItemToggler *m_button = CCMenuItemToggler::createWithSize(
-		fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str(),
-		fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str(),
-		this,
-		menu_selector(GalleryLayer::onNavButton),
-		0.9);
+	//	The sprites
+	auto inactiveSpr = tag == 0 ? CCSprite::create("AllModesOff.png"_spr) : CCSprite::createWithSpriteFrameName(fmt::format("gj_{}Btn_off_001.png", modeNames[tag]).c_str());
+	auto activeSpr = tag == 0 ? CCSprite::create("AllModesOn.png"_spr) : CCSprite::createWithSpriteFrameName(fmt::format("gj_{}Btn_on_001.png", modeNames[tag]).c_str());
+	inactiveSpr->setScale(0.9f);
+	activeSpr->setScale(0.9f);
 
-	if (tag == 0)
-	{
-		m_button = CCMenuItemToggler::createWithSize(
-			"AllModesOff.png"_spr,
-			"AllModesOn.png"_spr,
-			this,
-			menu_selector(GalleryLayer::onNavButton),
-			0.9);
-	}
+	//	The button
+	auto *m_button = CCMenuItemToggler::create(
+		inactiveSpr,
+		activeSpr,
+		this,
+		menu_selector(GalleryLayer::onNavButton));
 
 	m_button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
 	m_button->toggle(active);
@@ -370,86 +372,16 @@ void GalleryLayer::createModeButton(int tag, bool active)
 	//  Adds button to menu and updates layout.
 	m_modesMenu->addChild(m_button);
 	m_modesMenu->updateLayout();
-
-	/*
-	std::vector<const char *> sprites = {
-		"GamemodeAll.png"_spr,
-		"GamemodeCube.png"_spr,
-		"GamemodeShip.png"_spr,
-		"GamemodeBall.png"_spr,
-		"GamemodeUFO.png"_spr,
-		"GamemodeWave.png"_spr,
-		"GamemodeRobot.png"_spr,
-		"GamemodeSpider.png"_spr,
-		"GamemodeSwing.png"_spr,
-		"GamemodeJetpack.png"_spr,
-	};
-
-	const char *spriteName = "gj_streakBtn_off_001.png";
-	const char *mode = active ? "on" : "off";
-
-	std::vector<const char *> gamemodes = {
-		"all",
-		"icon",
-		"ship",
-		"ball",
-		"bird",
-		"dart",
-		"robot",
-		"spider",
-		"swing",
-		"jetpack"};
-
-	if (tag != 0)
-	{
-		spriteName = fmt::format("gj_{}Btn_{}_001.png", gamemodes[tag], mode).c_str();
-		auto buttonSpr = CCSprite::createWithSpriteFrameName(spriteName);
-
-		//  Button
-		auto button = CCMenuItemSpriteExtra::create(
-			buttonSpr,
-			this,
-			menu_selector(GalleryLayer::onNavButton));
-		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
-		button->setTag(tag);
-
-		//  Adds button to menu and updates layout.
-		m_modesMenu->addChild(button);
-		m_modesMenu->updateLayout();
-	}
-	else
-	{
-		//  Base color based on whenever the current page is on
-		auto buttonColor = (active) ? IconSelectBaseColor::Selected : IconSelectBaseColor::Unselected;
-		auto buttonSpr = IconSelectButtonSprite::createWithSprite(sprites[tag], 1.75f, buttonColor);
-		buttonSpr->setScale(0.9f);
-
-		//  Button
-		auto button = CCMenuItemSpriteExtra::create(
-			buttonSpr,
-			this,
-			menu_selector(GalleryLayer::onNavButton));
-		button->setID(fmt::format("gamemode-button-{:02}", tag + 1));
-		button->setTag(tag);
-
-		//  Adds button to menu and updates layout.
-		m_modesMenu->addChild(button);
-		m_modesMenu->updateLayout();
-	};
-	*/
 };
 
 void GalleryLayer::onNavButton(CCObject *sender)
 {
-	//	Arrow Buttons
-	m_prevBtn->setVisible(false);
-	m_nextBtn->setVisible(false);
-
 	auto tag = sender->getTag();
 	auto m_prevModeBtn = m_activeBtn;
 	m_activeBtn = tag;
 
-	log::debug("Tag = {}", tag);
+	if (m_activeBtn == m_prevModeBtn)
+		return;
 
 	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevModeBtn)))
 	{
@@ -460,35 +392,11 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
 	m_page = 0;
 
-	fetchGallery();
-
-	/*
-	auto tag = sender->getTag();
-	auto m_prevBtn = m_activeBtn;
-	m_activeBtn = tag;
-
-	//  Updates the sprite of the button of the previous page
-	if (auto oldNavButton = static_cast<CCMenuItemSpriteExtra *>(m_modesMenu->getChildByTag(m_prevBtn)))
-	{
-		static_cast<CCSprite *>(oldNavButton->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName("geode.loader/baseIconSelect_Normal_Unselected.png"));
-		oldNavButton->updateSprite();
-		m_modesMenu->updateLayout();
-	}
-
-	//  Updates the sprite of the button for the current page
-	if (auto navButton = static_cast<CCMenuItemSpriteExtra *>(sender))
-	{
-		static_cast<CCSprite *>(navButton->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName("geode.loader/baseIconSelect_Normal_Selected.png"));
-		navButton->updateSprite();
-		m_modesMenu->updateLayout();
-	}
-
-	m_isFilterActive = tag != 0;
-	m_mode = tag != 0 ? IconType{tag - 1} : IconType::Item;
-	m_page = 0;
+	//	Arrow Buttons
+	m_prevBtn->setVisible(false);
+	m_nextBtn->setVisible(false);
 
 	fetchGallery();
-	*/
 }
 
 void GalleryLayer::onPage(CCObject *sender)
