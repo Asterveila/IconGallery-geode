@@ -505,6 +505,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 	log::debug("Input = {} - Tag = {}", text, popup->getTag());
 
+	if (popup->getTag() == 0)
 	{
 		if (std::string_view(text) == std::string_view(m_searchFilter))
 			return;
@@ -512,7 +513,6 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 		m_searchFilter = text;
 
 		log::debug("Search filter updated");
-
 	}
 	else
 	{
