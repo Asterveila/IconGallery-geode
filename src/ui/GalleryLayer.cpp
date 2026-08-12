@@ -21,8 +21,8 @@ bool GalleryLayer::init()
 
 	//	Frame
 	auto frame = NineSlice::create("Frame.png"_spr);
-	frame->setContentSize({400, 256});
-	addChildAtPosition(frame, Anchor::Center, ccp(0, 0), false);
+	frame->setContentSize({398, 256});
+	addChildAtPosition(frame, Anchor::Center, ccp(-1, 0), false);
 
 	//	Title
 	auto title = CCSprite::create("GalleryLabel.png"_spr);
@@ -93,10 +93,29 @@ bool GalleryLayer::init()
 	m_pagesBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
 		this,
-		menu_selector(GalleryLayer::onFindPage));
+		menu_selector(GalleryLayer::onFind));
+	m_pagesBtn->setTag(0);
 	m_pagesBtn->setVisible(false);
 	m_pagesBtn->setID("pages-button");
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -40), false);
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
+
+	m_findBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_findBtn->setTag(1);
+	m_findBtn->setVisible(false);
+	m_findBtn->setID("search-button");
+	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -70), false);
+
+	m_authorBtn = CCMenuItemSpriteExtra::create(
+		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_authorBtn->setTag(2);
+	m_authorBtn->setVisible(false);
+	m_authorBtn->setID("author-button");
+	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
@@ -229,6 +248,12 @@ void GalleryLayer::fetchGallery()
 	if (m_pagesBtn)
 		m_pagesBtn->setVisible(false);
 
+	if (m_findBtn)
+		m_findBtn->setVisible(false);
+
+	if (m_authorBtn)
+		m_authorBtn->setVisible(false);
+
 	if (m_loading)
 		m_loading->setVisible(true);
 
@@ -265,8 +290,16 @@ void GalleryLayer::fetchGallery()
 			}
 			else
 			{
-				Notification::create("There was an error fetching the data", NotificationIcon::Error)->show();
-				log::error("Failed on loading data");
+				if (m_errorLabel)
+					m_errorLabel->removeMeAndCleanup();
+
+				m_errorLabel = CCLabelBMFont::create(fmt::format("Something went wrong (Error {})", res.code()).c_str(), "goldFont.fnt");
+				this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
+				m_errorLabel->setID("error-text");
+				m_errorLabel->setScale(0.6f);
+
+				m_loading->setVisible(false);
+				log::error("Failed on fetching gallery data -- Error {}: {}", res.code(), res.errorMessage());
 			}
 		});
 };
@@ -287,9 +320,13 @@ void GalleryLayer::loadGallery()
 	}
 
 	if (m_pagesBtn)
-	{
 		m_pagesBtn->setVisible(true);
-	}
+
+	if (m_findBtn)
+		m_findBtn->setVisible(true);
+
+	if (m_authorBtn)
+		m_authorBtn->setVisible(true);
 
 	auto fetchedIcons = m_fetchedData["icons"];
 
@@ -411,15 +448,33 @@ void GalleryLayer::onPage(CCObject *sender)
 	fetchGallery();
 }
 
-void GalleryLayer::onFindPage(CCObject *)
+void GalleryLayer::onFind(CCObject *sender)
 {
-	log::debug("Page = {} - Max Page = {}", m_page, m_maxPage);
+	auto tag = sender->getTag();
 
-	auto popup = SetIDPopup::create(m_page + 1, 1, m_maxPage + 1, "Go to page", "Go", true, 1, 0, false, true);
-	popup->setTag(3);
+	if (tag == 0)
+	{
+		log::debug("Page = {} - Max Page = {}", m_page, m_maxPage);
 
-	popup->m_delegate = this;
-	popup->show();
+		auto popup = SetIDPopup::create(m_page + 1, 1, m_maxPage + 1, "Go to page", "Go", true, 1, 0, false, true);
+		popup->m_delegate = this;
+		popup->setTag(3);
+		popup->show();
+	}
+	else if (tag == 1)
+	{
+		auto popup = SetTextPopup::create(m_searchFilter, "Enter a Name", 100, "Search Icon", "Go", true, 0);
+		popup->m_delegate = this;
+		popup->setTag(0);
+		popup->show();
+	}
+	else
+	{
+		auto popup = SetTextPopup::create(m_authorFilter, "Enter an User", 100, "Search by Author", "Go", true, 0);
+		popup->m_delegate = this;
+		popup->setTag(1);
+		popup->show();
+	}
 };
 
 void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
@@ -442,6 +497,33 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 
 	fetchGallery();
 };
+
+void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
+{
+	if (!popup || popup->m_cancelled)
+		return;
+
+	log::debug("Input = {} - Tag = {}", text, popup->getTag());
+
+	{
+		if (std::string_view(text) == std::string_view(m_searchFilter))
+			return;
+
+		m_searchFilter = text;
+
+		log::debug("Search filter updated");
+
+	}
+	else
+	{
+		if (std::string_view(text) == std::string_view(m_authorFilter))
+			return;
+
+		m_authorFilter = text;
+
+		log::debug("Author filter updated");
+	}
+}
 
 void GalleryLayer::onSettings(CCObject *)
 {

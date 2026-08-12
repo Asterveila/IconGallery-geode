@@ -1,5 +1,5 @@
 {
-	"geode": "5.8.2",
+	"geode": "5.9.0",
 	"gd": {
 		"win": "2.2081",
 		"mac": "2.2081",
@@ -8,7 +8,7 @@
 	},
 	"id": "ml5.icon-gallery",
 	"name": "Icon Gallery",
-	"version": "v1.0.0-alpha.4",
+	"version": "v1.0.0-alpha.5",
 	"developers": [
 		"ML500",
 		"Saritahhh"
@@ -75,6 +75,7 @@
 		}
 	},
 	"links": {
+		"source": "https://github.com/MasterL500/IconGallery-geode",
 		"community": "https://discord.gg/dceY3uvGzD",
 		"homepage": "https://iconsgallery.pages.dev/"
 	},
