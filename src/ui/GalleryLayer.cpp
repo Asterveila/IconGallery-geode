@@ -11,12 +11,12 @@ bool GalleryLayer::init()
 		return false;
 
 	auto winSize = CCDirector::sharedDirector()->getWinSize();
-	auto background = CCSprite::create("background.png"_spr);
 
 	// Background
-	background->setPosition(winSize / 2);
+	auto background = CCSprite::create("background.png"_spr);
 	background->setScaleY(winSize.height / background->getContentSize().height);
 	background->setScaleX(winSize.width / background->getContentSize().width);
+	background->setPosition(winSize / 2);
 	addChild(background, -2);
 
 	//	Frame
@@ -81,7 +81,7 @@ bool GalleryLayer::init()
 	m_modesMenu->setLayout(RowLayout::create()->setGap(2.5f));
 	addChildAtPosition(m_modesMenu, Anchor::Bottom, ccp(0, 30), false);
 
-	//	Creates the buttons
+	//	For the Gamemodes
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
@@ -117,6 +117,7 @@ bool GalleryLayer::init()
 	m_authorBtn->setID("author-button");
 	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
 
+	//	Settings
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
 
@@ -134,6 +135,7 @@ bool GalleryLayer::init()
 	folderBtn->setID("folder-button");
 	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
 
+	//	Socials
 	auto discordBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
 		this,
@@ -257,26 +259,34 @@ void GalleryLayer::fetchGallery()
 	if (m_loading)
 		m_loading->setVisible(true);
 
+	//	Main URL
 	std::string url = "https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/index";
 
-	//	Sorting order function
+	//	Sorting
 	auto order = Mod::get()->getSettingValue<std::string>("sort-order");
 	if (std::string_view(order) == std::string_view("Recent"))
-	{
 		url = fmt::format("{}?order=Recent", url);
-	}
 	else
-	{
 		url = fmt::format("{}?order=Downloads", url);
-	}
 
+	//	Page
 	url = fmt::format("{}&page={}", url, m_page + 1);
 
+	//	Gamemode
 	if (m_mode != IconType::Item)
 		url = fmt::format("{}&mode={}", url, (int)m_mode);
 
+	//	Author
+	if (!m_authorFilter.empty())
+		url = fmt::format("{}&artist={}", url, m_authorFilter);
+
+	//	Query
+	if (!m_searchFilter.empty())
+		url = fmt::format("{}&query={}", url, m_searchFilter);
+
 	log::debug("URL = {}", url);
 
+	//	Makes the request
 	auto req = web::WebRequest();
 
 	m_listener.spawn(
@@ -523,6 +533,8 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 		log::debug("Author filter updated");
 	}
+
+	fetchGallery();
 }
 
 void GalleryLayer::onSettings(CCObject *)
