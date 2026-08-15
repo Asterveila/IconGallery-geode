@@ -3,7 +3,7 @@
 #include "GalleryLayer.hpp"
 #include "IconCell.hpp"
 
-const int CELL_HEIGHT = 70;
+const int CELL_HEIGHT = 73;
 
 bool GalleryLayer::init()
 {
@@ -21,8 +21,8 @@ bool GalleryLayer::init()
 
 	//	Frame
 	auto frame = NineSlice::create("Frame.png"_spr);
-	frame->setContentSize({398, 256});
-	addChildAtPosition(frame, Anchor::Center, ccp(-1, 0), false);
+	frame->setContentSize({400, 255});
+	addChildAtPosition(frame, Anchor::Center, ccp(0, 0), false);
 
 	//	Title
 	auto title = CCSprite::create("GalleryLabel.png"_spr);
@@ -151,7 +151,7 @@ bool GalleryLayer::init()
 	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-20, 20), false);
 
 	//	Scroll Layer
-	m_scrollLayer = ScrollLayer::create({356, 220});
+	m_scrollLayer = ScrollLayer::create({357, 220});
 	m_scrollLayer->setID("scroll-layer");
 	m_scrollLayer->setZOrder(-2);
 	this->addChildAtPosition(m_scrollLayer, Anchor::Center, ccp(-178, -110), false);
@@ -160,6 +160,7 @@ bool GalleryLayer::init()
 	m_loading = LoadingCircleSprite::create(1);
 	m_loading->setID("loading");
 	m_loading->setVisible(false);
+	m_loading->setScale(0.6f);
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
 
 	//	If there's no "Icon Pack" settled (via settings), creates one.

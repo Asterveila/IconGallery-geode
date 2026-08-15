@@ -7,10 +7,14 @@ class IconCell : public CCLayer
 protected:
 	Icon *m_icon;
 	CCLayerColor *m_background;
-	CCSize m_size = {356.0f, 70.0f};
+	CCSize m_size = {357.0f, 73.0f};
+	double m_margin = 3.f;
+	int m_previewAttempts;
 
 	bool init(Icon *data, bool even);
 	CCLabelBMFont *getGamemodeLabel(IconType gamemode);
+	float getExtraScale(IconType type);
+	CCNode* getTagContainer();
 
 public:
 	CCMenuItemSpriteExtra *m_downloadBtn = nullptr;
