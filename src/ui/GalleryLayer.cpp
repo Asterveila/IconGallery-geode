@@ -91,29 +91,26 @@ bool GalleryLayer::init()
 	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
 
 	m_pagesBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
 		this,
 		menu_selector(GalleryLayer::onFind));
 	m_pagesBtn->setTag(0);
-	m_pagesBtn->setVisible(false);
 	m_pagesBtn->setID("pages-button");
 	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
 
 	m_findBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
 		this,
 		menu_selector(GalleryLayer::onFind));
 	m_findBtn->setTag(1);
-	m_findBtn->setVisible(false);
 	m_findBtn->setID("search-button");
 	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -70), false);
 
 	m_authorBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
 		this,
 		menu_selector(GalleryLayer::onFind));
 	m_authorBtn->setTag(2);
-	m_authorBtn->setVisible(false);
 	m_authorBtn->setID("author-button");
 	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
 
@@ -141,14 +138,14 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onDiscord));
 	discordBtn->setID("discord-button");
-	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-20, 55), false);
+	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-25, 60), false);
 
 	auto websiteBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::create("WebsiteIcon.png"_spr),
 		this,
 		menu_selector(GalleryLayer::onWebsite));
 	websiteBtn->setID("website-button");
-	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-20, 20), false);
+	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-25, 25), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({357, 220});
@@ -248,15 +245,6 @@ void GalleryLayer::fetchGallery()
 	if (m_pageLabel)
 		m_pageLabel->setVisible(false);
 
-	if (m_pagesBtn)
-		m_pagesBtn->setVisible(false);
-
-	if (m_findBtn)
-		m_findBtn->setVisible(false);
-
-	if (m_authorBtn)
-		m_authorBtn->setVisible(false);
-
 	if (m_loading)
 		m_loading->setVisible(true);
 
@@ -329,15 +317,6 @@ void GalleryLayer::loadGallery()
 		m_pageLabel->setCString(fmt::format("{} to {} of {}", offset + 1, offset + 10, totalIcons).c_str());
 		m_pageLabel->setVisible(true);
 	}
-
-	if (m_pagesBtn)
-		m_pagesBtn->setVisible(true);
-
-	if (m_findBtn)
-		m_findBtn->setVisible(true);
-
-	if (m_authorBtn)
-		m_authorBtn->setVisible(true);
 
 	auto fetchedIcons = m_fetchedData["icons"];
 
@@ -506,6 +485,14 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 
 	m_page = newPage - 1;
 
+	//	Changes the sprite of the button
+	if (m_pagesBtn)
+	{
+		m_pagesBtn->setSprite(
+			ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png")
+		);
+	}
+
 	fetchGallery();
 };
 
@@ -535,6 +522,21 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 		log::debug("Author filter updated");
 	}
 
+	if (m_findBtn)
+	{
+		auto spriteName = m_searchFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
+		static_cast<CCSprite *>(m_findBtn->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(spriteName));
+		m_findBtn->updateSprite();
+	}
+
+	if (m_authorBtn)
+	{
+		auto spriteName = m_authorFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
+		static_cast<CCSprite *>(m_authorBtn->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(spriteName));
+		m_authorBtn->updateSprite();
+	}
+
+	m_page = 0;
 	fetchGallery();
 }
 

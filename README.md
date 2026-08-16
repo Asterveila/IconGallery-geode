@@ -9,13 +9,15 @@ This mod is still in active development, where things are prone to changes, more
 ## To-do List
 
 - Searching features.
-- Author-based filtering.
 - Sorting by icon names or authors.
 - Custom visuals (since we just took the shop).
 - If you got any suggestions, feel to create an issue.
 
 ## Credits
 
-- [Asterveila](https://github.com/Asterveila) - Host of the website.
 - [ML500](https://github.com/MasterL500) - Main mod developer.
-- [Uproxide](https://github.com/Uproxide) & More - Giving me permission to use code of the Texture Workshop, which made this mod happen :)
+- [Asterveila](https://github.com/Asterveila) - Co-developer and host of the website.
+- [Asr3n](https://gdbrowser.com/u/AsRenCL), [Exi/KetsuTT](https://gdbrowser.com/u/KetsuTT) & [Mistiik](https://gdbrowser.com/u/Mistik) - Admins of the website.
+
+### Special Thanks
+- [Uproxide](https://github.com/Uproxide) & More - Giving me permission to use code of the Texture Workshop, which made this mod happen.
