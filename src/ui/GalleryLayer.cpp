@@ -11,12 +11,12 @@ bool GalleryLayer::init()
 		return false;
 
 	auto winSize = CCDirector::sharedDirector()->getWinSize();
-	auto background = CCSprite::create("background.png"_spr);
 
 	// Background
-	background->setPosition(winSize / 2);
+	auto background = CCSprite::create("background.png"_spr);
 	background->setScaleY(winSize.height / background->getContentSize().height);
 	background->setScaleX(winSize.width / background->getContentSize().width);
+	background->setPosition(winSize / 2);
 	addChild(background, -2);
 
 	//	Frame
@@ -81,7 +81,7 @@ bool GalleryLayer::init()
 	m_modesMenu->setLayout(RowLayout::create()->setGap(2.5f));
 	addChildAtPosition(m_modesMenu, Anchor::Bottom, ccp(0, 30), false);
 
-	//	Creates the buttons
+	//	For the Gamemodes
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
@@ -91,13 +91,30 @@ bool GalleryLayer::init()
 	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
 
 	m_pagesBtn = CCMenuItemSpriteExtra::create(
-		CCSprite::createWithSpriteFrameName("gj_findBtn_001.png"),
+		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
 		this,
-		menu_selector(GalleryLayer::onFindPage));
-	m_pagesBtn->setVisible(false);
+		menu_selector(GalleryLayer::onFind));
+	m_pagesBtn->setTag(0);
 	m_pagesBtn->setID("pages-button");
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -40), false);
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
 
+	m_findBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_findBtn->setTag(1);
+	m_findBtn->setID("search-button");
+	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -70), false);
+
+	m_authorBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_authorBtn->setTag(2);
+	m_authorBtn->setID("author-button");
+	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
+
+	//	Settings
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
 
@@ -115,19 +132,20 @@ bool GalleryLayer::init()
 	folderBtn->setID("folder-button");
 	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
 
+	//	Socials
 	auto discordBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
 		this,
 		menu_selector(GalleryLayer::onDiscord));
 	discordBtn->setID("discord-button");
-	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-20, 55), false);
+	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-25, 60), false);
 
 	auto websiteBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::create("WebsiteIcon.png"_spr),
 		this,
 		menu_selector(GalleryLayer::onWebsite));
 	websiteBtn->setID("website-button");
-	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-20, 20), false);
+	buttonMenu->addChildAtPosition(websiteBtn, Anchor::BottomRight, ccp(-25, 25), false);
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({357, 220});
@@ -227,32 +245,37 @@ void GalleryLayer::fetchGallery()
 	if (m_pageLabel)
 		m_pageLabel->setVisible(false);
 
-	if (m_pagesBtn)
-		m_pagesBtn->setVisible(false);
-
 	if (m_loading)
 		m_loading->setVisible(true);
 
+	//	Main URL
 	std::string url = "https://expiration-hit-supplier-manufacturer.trycloudflare.com/api/index";
 
-	//	Sorting order function
+	//	Sorting
 	auto order = Mod::get()->getSettingValue<std::string>("sort-order");
 	if (std::string_view(order) == std::string_view("Recent"))
-	{
 		url = fmt::format("{}?order=Recent", url);
-	}
 	else
-	{
 		url = fmt::format("{}?order=Downloads", url);
-	}
 
+	//	Page
 	url = fmt::format("{}&page={}", url, m_page + 1);
 
+	//	Gamemode
 	if (m_mode != IconType::Item)
 		url = fmt::format("{}&mode={}", url, (int)m_mode);
 
+	//	Author
+	if (!m_authorFilter.empty())
+		url = fmt::format("{}&artist={}", url, m_authorFilter);
+
+	//	Query
+	if (!m_searchFilter.empty())
+		url = fmt::format("{}&query={}", url, m_searchFilter);
+
 	log::debug("URL = {}", url);
 
+	//	Makes the request
 	auto req = web::WebRequest();
 
 	m_listener.spawn(
@@ -266,8 +289,16 @@ void GalleryLayer::fetchGallery()
 			}
 			else
 			{
-				Notification::create("There was an error fetching the data", NotificationIcon::Error)->show();
-				log::error("Failed on loading data");
+				if (m_errorLabel)
+					m_errorLabel->removeMeAndCleanup();
+
+				m_errorLabel = CCLabelBMFont::create(fmt::format("Something went wrong (Error {})", res.code()).c_str(), "goldFont.fnt");
+				this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
+				m_errorLabel->setID("error-text");
+				m_errorLabel->setScale(0.6f);
+
+				m_loading->setVisible(false);
+				log::error("Failed on fetching gallery data -- Error {}: {}", res.code(), res.errorMessage());
 			}
 		});
 };
@@ -285,11 +316,6 @@ void GalleryLayer::loadGallery()
 	{
 		m_pageLabel->setCString(fmt::format("{} to {} of {}", offset + 1, offset + 10, totalIcons).c_str());
 		m_pageLabel->setVisible(true);
-	}
-
-	if (m_pagesBtn)
-	{
-		m_pagesBtn->setVisible(true);
 	}
 
 	auto fetchedIcons = m_fetchedData["icons"];
@@ -412,15 +438,33 @@ void GalleryLayer::onPage(CCObject *sender)
 	fetchGallery();
 }
 
-void GalleryLayer::onFindPage(CCObject *)
+void GalleryLayer::onFind(CCObject *sender)
 {
-	log::debug("Page = {} - Max Page = {}", m_page, m_maxPage);
+	auto tag = sender->getTag();
 
-	auto popup = SetIDPopup::create(m_page + 1, 1, m_maxPage + 1, "Go to page", "Go", true, 1, 0, false, true);
-	popup->setTag(3);
+	if (tag == 0)
+	{
+		log::debug("Page = {} - Max Page = {}", m_page, m_maxPage);
 
-	popup->m_delegate = this;
-	popup->show();
+		auto popup = SetIDPopup::create(m_page + 1, 1, m_maxPage + 1, "Go to page", "Go", true, 1, 0, false, true);
+		popup->m_delegate = this;
+		popup->setTag(3);
+		popup->show();
+	}
+	else if (tag == 1)
+	{
+		auto popup = SetTextPopup::create(m_searchFilter, "Enter a Name", 100, "Search Icon", "Go", true, 0);
+		popup->m_delegate = this;
+		popup->setTag(0);
+		popup->show();
+	}
+	else
+	{
+		auto popup = SetTextPopup::create(m_authorFilter, "Enter an User", 100, "Search by Author", "Go", true, 0);
+		popup->m_delegate = this;
+		popup->setTag(1);
+		popup->show();
+	}
 };
 
 void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
@@ -441,8 +485,60 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 
 	m_page = newPage - 1;
 
+	//	Changes the sprite of the button
+	if (m_pagesBtn)
+	{
+		m_pagesBtn->setSprite(
+			ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png")
+		);
+	}
+
 	fetchGallery();
 };
+
+void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
+{
+	if (!popup || popup->m_cancelled)
+		return;
+
+	log::debug("Input = {} - Tag = {}", text, popup->getTag());
+
+	if (popup->getTag() == 0)
+	{
+		if (std::string_view(text) == std::string_view(m_searchFilter))
+			return;
+
+		m_searchFilter = text;
+
+		log::debug("Search filter updated");
+	}
+	else
+	{
+		if (std::string_view(text) == std::string_view(m_authorFilter))
+			return;
+
+		m_authorFilter = text;
+
+		log::debug("Author filter updated");
+	}
+
+	if (m_findBtn)
+	{
+		auto spriteName = m_searchFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
+		static_cast<CCSprite *>(m_findBtn->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(spriteName));
+		m_findBtn->updateSprite();
+	}
+
+	if (m_authorBtn)
+	{
+		auto spriteName = m_authorFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
+		static_cast<CCSprite *>(m_authorBtn->getNormalImage())->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(spriteName));
+		m_authorBtn->updateSprite();
+	}
+
+	m_page = 0;
+	fetchGallery();
+}
 
 void GalleryLayer::onSettings(CCObject *)
 {

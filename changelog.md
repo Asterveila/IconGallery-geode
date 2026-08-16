@@ -1,6 +1,19 @@
 # Changelog
 
-### <cy>v1.0.0-alpha.4</c> (Latest)
+### <cy>v1.0.0-alpha.6</c> (Latest)
+
+* <cp>Thank you Saritahh for your contribution!</c>
+* <cg>Added</c> tag visuals for formats and gamemodes.
+* <cg>Added</c> back the text description on icons.
+* <cg>Added</c> custom visuals for search buttons.
+* <cy>Fixed</c> error on searching.
+
+### <co>v1.0.0-alpha.5</c>
+
+* <cg>Added</c> search Icon by Name.
+* <cg>Added</c> search Icon by Author.
+
+### <co>v1.0.0-alpha.4</c> (Latest)
 
 * <cg>Added</c> custom button for the gallery.
 * <cy>Fixed</c> visual bug in lower resolutions.
