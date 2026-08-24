@@ -8,7 +8,7 @@ This mod is still in active development, where things are prone to changes, more
 
 ## To-do List
 
-- Searching features.
+- More Searching features.
 - Sorting by icon names or authors.
 - Custom visuals (since we just took the shop).
 - If you got any suggestions, feel to create an issue.

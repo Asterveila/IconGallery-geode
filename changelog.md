@@ -1,6 +1,13 @@
 # Changelog
 
-### <co>v1.0.0-alpha.6</c> (Latest)
+### <cy>v1.0.0-beta.1</c> (Latest)
+
+* First beta release.
+* <cg>Added</c> reload textures button.
+* <cy>Fixed</c> visual bug on gamemode buttons.
+* <cy>Fixed</c> visual bug on page button.
+
+### <co>v1.0.0-alpha.6</c>
 
 * <cp>Thank you Saritahh for your contribution!</c>
 * <cg>Added</c> tag visuals for formats and gamemodes.
@@ -14,7 +21,7 @@
 * <cg>Added</c> search Icon by Name.
 * <cg>Added</c> search Icon by Author.
 
-### <co>v1.0.0-alpha.4</c> (Latest)
+### <co>v1.0.0-alpha.4</c>
 
 * <cg>Added</c> custom button for the gallery.
 * <cy>Fixed</c> visual bug in lower resolutions.

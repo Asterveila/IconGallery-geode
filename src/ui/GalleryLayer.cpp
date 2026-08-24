@@ -132,6 +132,16 @@ bool GalleryLayer::init()
 	folderBtn->setID("folder-button");
 	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
 
+	auto restartSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
+	restartSpr->setScale(0.9f);
+
+	auto restartBtn = CCMenuItemSpriteExtra::create(
+		restartSpr,
+		this,
+		menu_selector(GalleryLayer::onReset));
+	restartBtn->setID("reload-textures-button");
+	buttonMenu->addChildAtPosition(restartBtn, Anchor::BottomLeft, ccp(30, 120), false);
+
 	//	Socials
 	auto discordBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
@@ -338,10 +348,18 @@ void GalleryLayer::loadGallery()
 	auto totalIcons = m_fetchedData["totalIcons"].asInt().unwrapOr(1);
 	auto offset = (m_page * 10);
 
+	//	Updates the label of the Pages
 	if (m_pageLabel)
 	{
 		m_pageLabel->setCString(fmt::format("{} to {} of {}", offset + 1, offset + 10, totalIcons).c_str());
 		m_pageLabel->setVisible(true);
+	}
+
+	//	Updates the number of the pages button.
+	if (m_pagesBtn)
+	{
+		m_pagesBtn->setSprite(
+			ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"));
 	}
 
 	auto fetchedIcons = m_fetchedData["icons"];
@@ -436,7 +454,15 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	m_activeBtn = tag;
 
 	if (m_activeBtn == m_prevModeBtn)
+	{
+		if (auto button = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_activeBtn)))
+		{
+			//	log::debug("Button active?");
+			button->toggle(false);
+		}
+
 		return;
+	}
 
 	if (auto oldButton = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_prevModeBtn)))
 	{
@@ -582,6 +608,22 @@ void GalleryLayer::onFolder(CCObject *)
 	{
 		utils::file::openFolder(Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir());
 	}
+}
+
+void GalleryLayer::onReset(CCObject *)
+{
+	auto popup = createQuickPopup(
+		"Reload Textures",
+		"Are you sure you want to <cj>Reload textures</c>?",
+		"Cancel",
+		"Yes",
+		[this](auto, bool btn)
+		{
+			if (btn)
+			{
+				GameManager::get()->reloadAll(false, false, true);
+			}
+		});
 }
 
 void GalleryLayer::onDiscord(CCObject *)
