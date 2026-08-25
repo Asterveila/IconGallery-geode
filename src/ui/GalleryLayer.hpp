@@ -69,6 +69,7 @@ public:
 
 	void refreshGallery();
 	void setupIconPack();
+	void errorPopup();
 
 	static GalleryLayer *create();
 	CCScene *scene();

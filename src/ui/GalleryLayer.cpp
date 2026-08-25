@@ -190,6 +190,24 @@ bool GalleryLayer::init()
 	return true;
 };
 
+void GalleryLayer::errorPopup()
+{
+	auto popup = createQuickPopup(
+		"Connection Error",
+		"Mod couldn't fetch the server. Please check the <cy>Website</c> version of the <cg>Gallery</c> to verify if its server-side error or from your end.",
+		"OK",
+		"Website",
+		[this](auto, bool btn)
+		{
+			if (btn)
+			{
+				CCApplication::sharedApplication()->openURL("https://iconsgallery.pages.dev/");
+			}
+		});
+
+	popup->m_mainLayer = this;
+}
+
 void GalleryLayer::setupIconPack()
 {
 	if (Mod::get()->getSettingValue<bool>("more-icons-folder"))
@@ -269,6 +287,19 @@ void GalleryLayer::fetchURL()
 			{
 				Notification::create("Error while fetching API", NotificationIcon::Error)->show();
 				log::error("There was an error fetching the URL from website");
+
+				if (m_errorLabel)
+					m_errorLabel->removeMeAndCleanup();
+
+				m_errorLabel = CCLabelBMFont::create(fmt::format("Something went wrong (Error {})", res.code()).c_str(), "goldFont.fnt");
+				this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
+				m_errorLabel->setID("error-text");
+				m_errorLabel->setScale(0.6f);
+
+				this->runAction(CCSequence::create(
+					CCDelayTime::create(1.f),
+					CCCallFunc::create(this, callfunc_selector(GalleryLayer::errorPopup)),
+					0));
 			}
 		});
 }
@@ -283,6 +314,9 @@ void GalleryLayer::fetchGallery()
 
 	if (m_loading)
 		m_loading->setVisible(true);
+
+	if (m_errorLabel)
+		m_errorLabel->removeMeAndCleanup();
 
 	//	Main URL
 	std::string url = fmt::format("{}/api/index", Mod::get()->getSavedValue<std::string>("API"));
@@ -335,6 +369,8 @@ void GalleryLayer::fetchGallery()
 
 				m_loading->setVisible(false);
 				log::error("Error {}: Failed on fetching gallery data... {}", res.code(), res.errorMessage());
+
+				errorPopup();
 			}
 		});
 };
