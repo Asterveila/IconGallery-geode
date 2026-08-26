@@ -65,9 +65,11 @@ public:
 	void onNavButton(CCObject *sender);
 	void onWebsite(CCObject *sender);
 	void onDiscord(CCObject *sender);
+	void onReset(CCObject *sender);
 
 	void refreshGallery();
 	void setupIconPack();
+	void errorPopup();
 
 	static GalleryLayer *create();
 	CCScene *scene();
