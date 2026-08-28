@@ -1,6 +1,10 @@
 # Changelog
 
-### <cy>v1.0.0-beta.1</c> (Latest)
+### <cy>v1.0.0-beta.2</c> (Latest)
+
+* <cg>Added</c> help button for a guide.
+
+### <co>v1.0.0-beta.1</c>
 
 * First beta release.
 * <cg>Added</c> reload textures button.

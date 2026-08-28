@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "../nodes/Icon.hpp"
 #include "GalleryLayer.hpp"
+#include "Geode/cocos/sprite_nodes/CCSprite.h"
 #include "IconCell.hpp"
 
 const int CELL_HEIGHT = 73;
@@ -85,36 +86,16 @@ bool GalleryLayer::init()
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
-	//	Buttons Menu
-	auto buttonMenu = CCMenu::create();
-	buttonMenu->setID("button-menu");
-	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
+	//	Left Button Menu (For settings and options)
+	auto leftButtonMenu = CCMenu::create();
+	leftButtonMenu->setAnchorPoint({0, 0});
+	leftButtonMenu->setLayout(ColumnLayout::create()
+								  ->setAxisAlignment(AxisAlignment::Start)
+								  ->setGap(0.5f));
 
-	m_pagesBtn = CCMenuItemSpriteExtra::create(
-		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_pagesBtn->setTag(0);
-	m_pagesBtn->setID("pages-button");
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
+	addChildAtPosition(leftButtonMenu, Anchor::BottomLeft, ccp(8, 8), false);
 
-	m_findBtn = CCMenuItemSpriteExtra::create(
-		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_findBtn->setTag(1);
-	m_findBtn->setID("search-button");
-	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -70), false);
-
-	m_authorBtn = CCMenuItemSpriteExtra::create(
-		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_authorBtn->setTag(2);
-	m_authorBtn->setID("author-button");
-	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
-
-	//	Settings
+	//	Settings Button -- Self-explanatory
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
 
@@ -123,15 +104,15 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onSettings));
 	settingsBtn->setID("settings-button");
-	buttonMenu->addChildAtPosition(settingsBtn, Anchor::BottomLeft, ccp(30, 30), false);
 
+	//	Folder Button -- Displays the current location where all icons will be downloaded.
 	auto folderBtn = CCMenuItemSpriteExtra::create(
 		CircleButtonSprite::createWithSpriteFrameName("gj_folderBtn_001.png", 1, CircleBaseColor::Green, CircleBaseSize::SmallAlt),
 		this,
 		menu_selector(GalleryLayer::onFolder));
 	folderBtn->setID("folder-button");
-	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
 
+	//	Restart Button -- Reloads the textures of the game (to load up the icons)
 	auto restartSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
 	restartSpr->setScale(0.9f);
 
@@ -140,7 +121,55 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onReset));
 	restartBtn->setID("reload-textures-button");
-	buttonMenu->addChildAtPosition(restartBtn, Anchor::BottomLeft, ccp(30, 120), false);
+
+	//	Help Button -- Displays a guide on how the Icon Gallery works.
+	auto helpSpr = CCSprite::createWithSpriteFrameName("GJ_helpBtn_001.png");
+	helpSpr->setScale(1.1f);
+
+	auto helpBtn = CCMenuItemSpriteExtra::create(
+		helpSpr,
+		this,
+		menu_selector(GalleryLayer::onHelp));
+	helpBtn->setID("help-button");
+
+	//	Adds the buttons to the menu
+	leftButtonMenu->addChild(settingsBtn);
+	leftButtonMenu->addChild(folderBtn);
+	leftButtonMenu->addChild(restartBtn);
+	leftButtonMenu->addChild(helpBtn);
+	leftButtonMenu->updateLayout();
+
+	//	Buttons Menu
+	auto buttonMenu = CCMenu::create();
+	buttonMenu->setID("button-menu");
+	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
+
+	//	Button to get to a specific Page
+	m_pagesBtn = CCMenuItemSpriteExtra::create(
+		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_pagesBtn->setTag(0);
+	m_pagesBtn->setID("pages-button");
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
+
+	//	Search -- Searches Icons by the Name
+	m_findBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_findBtn->setTag(1);
+	m_findBtn->setID("search-button");
+	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -65), false);
+
+	//	Search Author -- Searches Icons by the Author Name
+	m_authorBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_authorBtn->setTag(2);
+	m_authorBtn->setID("author-button");
+	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -100), false);
 
 	//	Socials
 	auto discordBtn = CCMenuItemSpriteExtra::create(
@@ -246,6 +275,12 @@ void GalleryLayer::setupIconPack()
 						Notification::create("Icon Pack succesfully created!", NotificationIcon::Success)->show();
 						log::debug("Pack.json succesfully written!");
 					}
+				}
+				else if (std::filesystem::exists(directory / "Icon Gallery"))
+				{
+					Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", directory / "Icon Gallery");
+					Notification::create("Icon Pack found!", NotificationIcon::Success)->show();
+					log::debug("Pack folder found in Texture loader, assigned value to it");
 				}
 				else
 				{
@@ -625,6 +660,16 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 	m_page = 0;
 	fetchGallery();
+}
+
+void GalleryLayer::onHelp(CCObject *)
+{
+	auto popup = MDPopup::create(
+		"How to Icon Gallery",
+		"The <co>**Icon Gallery**</c> is a website created for the Geometry Dash community, made to act as a museum of Public Icons people can download and install in their clients.\n\n<cc>*Please be aware, that the servers might not be stable to handle all the requests at once, so if icons doesn't load properly, that is the reason.*</c>\n***\n## How to Use\nAt the beginning, the mod will prompt you to create a <cy>Texture Pack</c>. If you accept, it will create the texture pack inside the <cg>Texture Loader</c> directory.\n\nEvery icon downloaded from the Gallery will be added in said texture pack by <cg>default</c> (Unless you enabled the special locations in the settings).\n\nIf you can't see any icons you downloaded, make sure that the \"<co>Downloaded Icons</c>\" pack is applied in the <cg>Texture Loader</c>.\n***\n## Downloading Icons\nOnce you have found an icon you wish to download, click the \"<co>Download</c>\" button at the right side and confirm it's downloading.\n\nIf \"<cy>**Automatic Unpacking**</c>\" is enabled, the downloaded zip file will be unpacked and the sprites of the icon will be added to the destined icon pack folder. If disabled, the mod will prompt you to unpack it or not.\n\n* **Icons tagged with the \"<cb>Vanilla</c>\" format**: will be added inside the \"Icons\" folder of the texture pack.\n* **Icons tagged with the \"<cp>More Icons</c>\" format:** will be added in their specified gamemode folder of More Icons.\n#### Examples:\n* If you downloaded a vanilla Cube, the path where the icon ends up is: \n`[pack folder]\\icons`\n* If you downloaded a More Icons cube, the path where the icon ends up is:\n`[pack folder]\\config\\hiimjustin000.more_icons\\i(gamemode)`\n***\n## Uploading Icons\nIf you wish to upload an icon here, please go to the [**Website version of the Icon Gallery**](https://iconsgallery.pages.dev/), click on the <cg>bottom right button</c> and follow the instructions on how to submit your icons.\n\n<cc>*Please* ***read the guidelines*** *and make sure your icon follows the right format. Any icon that breaks either will have higher chances of rejection.*</c>\n***\n## Bugs or crashes\nIf you have come across issues such as discovering an icon that doesn't load properly or mod crashes, make sure to report it to us in [Asterveila's Discord Server](https://discord.gg/dceY3uvGzD).",
+		"Okay");
+
+	popup->show();
 }
 
 void GalleryLayer::onSettings(CCObject *)
