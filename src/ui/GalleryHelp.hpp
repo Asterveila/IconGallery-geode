@@ -8,7 +8,7 @@ class GalleryHelpPopup : public Popup
 {
 protected:
 	MDTextArea *m_textArea = nullptr;
-	CCMenu *m_buttonMenu = nullptr;
+	CCMenu *m_selectMenu = nullptr;
 
 	bool init();
 
@@ -18,6 +18,7 @@ protected:
 
 public:
 	unsigned int m_page = 0;
+	bool m_spanish = false;
 
 	static GalleryHelpPopup *create();
 };
