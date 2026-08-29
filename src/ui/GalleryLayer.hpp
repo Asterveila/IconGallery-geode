@@ -58,13 +58,16 @@ public:
 	bool m_isFilterActive = false;
 
 	void onBack(CCObject *sender);
+
 	void onFolder(CCObject *sender);
 	void onSettings(CCObject *sender);
 	void onReset(CCObject *sender);
 	void onHelp(CCObject *sender);
+
 	void onNavButton(CCObject *sender);
 	void onPage(CCObject *sender);
 	void onFind(CCObject *sender);
+
 	void onWebsite(CCObject *sender);
 	void onDiscord(CCObject *sender);
 
