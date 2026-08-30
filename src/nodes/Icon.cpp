@@ -131,12 +131,15 @@ void Icon::unpackIcon()
 
 	//	This is prone to issues, I know.
 	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder");
-	std::filesystem::path unzipDir = (m_format == IconFormat::MoreIcons) ? (path / "config" / "hiimjustin000.more_icons" / gamemode) : (path / "icons");
+	std::filesystem::path unzipDir = (m_format == IconFormat::MoreIcons) || Mod::get()->getSettingValue<bool>("vanilla-more-icons") ? (path / "config" / "hiimjustin000.more_icons" / gamemode) : (path / "icons");
 
 	//	Special locations (if their settings are enabled)
 	if(m_format == IconFormat::Vanilla && Mod::get()->getSettingValue<bool>("resources-folder")){
+		log::debug("Resources Folder Enabled");
 		unzipDir = geode::dirs::getResourcesDir() / "icons";
+
 	} else if(Mod::get()->getSettingValue<bool>("more-icons-folder")){
+		log::debug("More Icons Folder Enabled");
 		unzipDir = Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir() / gamemode;
 	}
 

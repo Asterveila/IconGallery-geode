@@ -2,8 +2,9 @@
 
 ### <cy>v1.0.0-beta.2</c> (Latest)
 
-* <cg>Added</c> help popup (info will be tweaked from time to time).
-* <cg>Added</c> bilingual descriptions on help and mod settings.
+* <cg>Added</c> help information in English and Spanish.
+* <cg>Added</c> setting to download Vanilla icons as More Icons Format.
+* <co>rewritten</c> settings to have both English and Spanish descriptions.
 * <cy>Fixed</c> possible bug when you reset the folder location.
 * <cy>Fixed</c> bugged popup when no icons are found.
 

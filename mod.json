@@ -29,6 +29,12 @@
 			],
 			"default": "Most Downloaded"
 		},
+		"vanilla-more-icons": {
+			"type": "bool",
+			"name": "Vanilla as More Icons",
+			"description": "cy>**ENGLISH**</c>: Icons with the <cf>Vanilla</c> format will be treated the same as icons with <cp>More Icons</c> format.\n\nThat means, they'll end inside the <cc>Texture Pack</c>'s <cp>More Icons</c> folders.\n\n<cy>**SPANISH**</c>: Iconos con el formato <cf>Vanilla</c> se trataran igual que iconos con formato <cp>More Icons</c>.\n\nEs decir, terminarian dentro de las carpetas <cp>More Icons</c> del <cc>Texture Pack</c>.",
+			"default": true
+		},
 		"unzip-settings": {
 			"type": "title",
 			"name": "Unpackaging Settings"
@@ -36,13 +42,13 @@
 		"auto-unpack": {
 			"type": "bool",
 			"name": "Automatic unpacking",
-			"description": "<cy>***ENGLISH**</c>: Icons you downloaded from the gallery will be extracted and added right away on the designated Pack folder.\n***\n<cy>***SPANISH**</c>: Iconos descargados seran extraidos y agregados de una vez en la carpeta del Pack designado.",
+			"description": "<cy>**ENGLISH**</c>: Icons you downloaded from the gallery will be extracted and added right away on the designated Pack folder.\n**\n<cy>***SPANISH**</c>: Iconos descargados seran extraidos y agregados de una vez en la carpeta del Pack designado.",
 			"default": true
 		},
 		"delete-zips": {
 			"type": "bool",
 			"name": "Delete ZIP Packs",
-			"description": "<cy>***ENGLISH**</c>: If you want to delete the ZIP package after an icon is unpacked.\n***\n<cy>***SPANISH**</c>: Si deseas borrar el paquete ZIP despues que un icono sea extraido.",
+			"description": "<cy>**ENGLISH**</c>: If you want to delete the ZIP package after an icon is unpacked.\n***\n<cy>**SPANISH**</c>: Si deseas borrar el paquete ZIP despues que un icono sea extraido.",
 			"default": true
 		},
 		"folder-settings": {
@@ -52,17 +58,19 @@
 		"resources-folder": {
 			"type": "bool",
 			"name": "Use Resources Folder",
-			"description": "<cy>***ENGLISH**</c>: Icons with the <cf>Vanilla</c> format would end up in the main game resources folder.\n\n<cr>Do not enable it if you don't want to replace vanilla Icons.</c>***\n<cy>***SPANISH**</c>: Iconos con el formato <cf>Vanilla</c> terminarian en la carpeta de recursos principales del juego.\n\n<cr>No lo actives si no quieres reemplazar los Iconos originales</c>",
+			"description": "<cy>**ENGLISH**</c>: Icons with the <cf>Vanilla</c> format would end up in the main game resources folder.\n\n<cr>Do not enable it if you don't want to replace vanilla Icons.</c>\n***\n<cy>**SPANISH**</c>: Iconos con el formato <cf>Vanilla</c> terminarian en la carpeta de recursos principales del juego.\n\n<cr>No lo actives si no quieres reemplazar los Iconos originales</c>",
 			"platforms": [
 				"win",
 				"mac"
 			],
-			"default": false
+			"default": false,
+			"enable-if": "!vanilla-more-icons",
+			"enable-if-description": "Disable the \"Vanilla as More Icons\" setting"
 		},
 		"more-icons-folder": {
 			"type": "bool",
 			"name": "Use More Icons folder",
-			"description": "<cy>***ENGLISH**</c>: ALL icons (including vanilla) would end up in the More Icons folders.\n\nKeep in mind you could override some of your own icons.\n***\n<cy>***SPANISH**</c>: TODOS los iconos (incluyendo vanilla) terminarian en las carpetas de More Icons.\n\nToma encuenta que pdorias reemplazar algunos que tengas.",
+			"description": "<cy>**ENGLISH**</c>: If you want **ALL** downloaded icons end up inside the folders of the <cp>**More Icons Mod**</c>.\n\nKeep in mind you could override some of your own icons.\n***\n<cy>**SPANISH**</c>: Si quieres que **TODOS** los iconos descargados terminen dentro de las carpetas del <cp>**Mod de More Icons**</c>.\n\nToma encuenta que pdorias reemplazar algunos que tengas.",
 			"enable-if": "loaded:hiimjustin000.more_icons",
 			"enable-if-description": "This option requires More Icons to be installed",
 			"default": false

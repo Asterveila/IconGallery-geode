@@ -184,22 +184,26 @@ void GalleryHelpPopup::setInfo()
 	case 2:
 		//	DOWNLOADING
 		info = fmt::format(
-			"{}{}{}{}{}",
+			"{}{}{}{}{}{}{}",
 			"# Downloading Icons",
 			"\nOnce you find the icons you wish to download, simply click the \"<co>Download</c>\" button at the right side of the icon.",
 			"\n***\n### Formats:",
 			"\n* **Icons with the \"<cf>Vanilla</c>\" format** are found inside the \"Icons\" folder of the Texture Pack.",
-			"\n* **Icons with the \"<cp>More Icons</c>\" format** are found inside their gamemode-specific folder of <cl>More Icons</c>.");
+			"\n* **Icons with the \"<cp>More Icons</c>\" format** are found inside their gamemode-specific folder of <cl>More Icons</c>.",
+			"\n***\n### Vanilla as More Icons",
+			"\nIf you have the <cy>**Vanilla as More Icons**</c> setting enabled, all icons you download will be treated as the <cp>More Icons</c> format.");
 
 		if (m_spanish)
 		{
 			info = fmt::format(
-				"{}{}{}{}{}",
+				"{}{}{}{}{}{}{}",
 				"# Descargar Iconos",
 				"\nSi encuentras un icono que deseas descargar, presiona el boton de <co>Descarga</c> a la derecha del icono.",
 				"\n***\n### Formatos:",
 				"\n* **Iconos con el formato \"<cf>Vanilla</c>\"** se encuentran en la carpeta de \"Icons\" del texture pack.",
-				"\n* **Iconos con el formato \"<cp>More Icons</c>\"** se encuentran en su carpeta especifica del Gamemode de <cl>More Icons</c>");
+				"\n* **Iconos con el formato \"<cp>More Icons</c>\"** se encuentran en su carpeta especifica del Gamemode de <cl>More Icons</c>.",
+				"\n***\n### Vanilla as More Icons",
+				"\nSi tienes la configuracion <cy>**Vanilla as More Icons**</c> activa, todos los iconos descargados se trataran como el formato <cp>More Icons</c>.");
 		}
 		break;
 
