@@ -440,14 +440,10 @@ void GalleryLayer::loadGallery()
 
 	if (m_fetchedData["totalIcons"].asInt().unwrapOr(0) == 0)
 	{
-		if (m_errorLabel)
-			m_errorLabel->removeMeAndCleanup();
-
 		m_errorLabel = CCLabelBMFont::create("No icons found.", "goldFont.fnt");
 		this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
 		m_errorLabel->setID("error-text");
 		m_errorLabel->setScale(0.6f);
-		return;
 	}
 	else
 	{
