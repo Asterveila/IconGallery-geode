@@ -83,7 +83,7 @@ bool GalleryHelpPopup::init()
 	m_languageButton->m_onButton->m_scaleMultiplier = 1.1f;
 	m_languageButton->setID("language-button");
 	m_languageButton->toggle(m_spanish);
-	m_buttonMenu->addChildAtPosition(m_languageButton, Anchor::BottomLeft, ccp(60, 25), false);
+	m_buttonMenu->addChildAtPosition(m_languageButton, Anchor::BottomLeft, ccp(60, 24), false);
 
 	//	Calls the function to set the info
 	setInfo();
@@ -208,7 +208,7 @@ void GalleryHelpPopup::setInfo()
 		info = fmt::format(
 			"{}{}{}",
 			"# Uploading Icons",
-			"If you wish to upload your own icons, visit the <cg>Website version of the Gallery</c> go to the submitting page (via the bottom right button at the website) and follow the steps to submission.",
+			"\nIf you wish to upload your own icons, visit the <cg>Website version of the Gallery</c> go to the submitting page (via the bottom right button at the website) and follow the steps to submission.",
 			"\n\n<cc>*Please* ***read the guidelines*** *and make sure your icon follows the right format. Any icon that breaks either will have higher chances of rejection.*</c>");
 
 		if (m_spanish)
@@ -232,7 +232,7 @@ void GalleryHelpPopup::setInfo()
 			"\n***\n### I can't find an Icon I downloaded",
 			"\nReload your textures if you don't see any changes. Some icons might have the \"<cf>Vanilla</c>\" format, thus they take the place of existing vanilla designs.",
 			"\n***\n### I want to report an Icon",
-			"\nIf you came across with an icon that doesn't load properly, or has incorrect author credits, make sure to report it to the admins of the Gallery via the <cd>discord server</c>.",
+			"\nIf you came across with an icon that doesn't load properly, or has incorrect author credits, make sure to report it to the admins of the Gallery via the <cd>Discord Server</c>.",
 			"\n***\n### I'm having connection issues",
 			"\nIf you're having connection issues with the mod, please be patient. This can either mean that you have internet connection issues, rate limitations or it's a server-side issue.");
 

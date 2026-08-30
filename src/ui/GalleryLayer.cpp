@@ -434,46 +434,63 @@ void GalleryLayer::loadGallery()
 	}
 
 	auto fetchedIcons = m_fetchedData["icons"];
+	auto count = m_fetchedData["totalIcons"].asInt().unwrapOr(0);
 
-	std::vector<Icon *> icons = {};
-	int ii = 0;
+	log::debug("Icons Count = {}", count);
 
-	for (auto &value : fetchedIcons)
+	if (m_fetchedData["totalIcons"].asInt().unwrapOr(0) == 0)
 	{
-		auto iconData = value;
+		if (m_errorLabel)
+			m_errorLabel->removeMeAndCleanup();
 
-		Icon *newIcon = Icon::create(
-			iconData["iconName"].asString().unwrap(),
-			iconData["author"].asString().unwrap(),
-			iconData["filename"].asString().unwrap(),
-			iconData["previewUrl"].asString().unwrap(),
-			iconData["gamemode"].asInt().unwrap(),
-			iconData["downloads"].asInt().unwrapOr(0),
-			iconData["description"].asString().unwrapOr(""),
-			iconData["format"].asString().unwrapOr(""));
+		m_errorLabel = CCLabelBMFont::create("No icons found.", "goldFont.fnt");
+		this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
+		m_errorLabel->setID("error-text");
+		m_errorLabel->setScale(0.6f);
+		return;
+	}
+	else
+	{
+		std::vector<Icon *> icons = {};
+		int ii = 0;
 
-		//	If there's data of collaborators
-		auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
-		if (!collab.empty())
+		for (auto &value : fetchedIcons)
 		{
-			newIcon->addCollab(collab);
+			auto iconData = value;
+
+			Icon *newIcon = Icon::create(
+				iconData["iconName"].asString().unwrap(),
+				iconData["author"].asString().unwrap(),
+				iconData["filename"].asString().unwrap(),
+				iconData["previewUrl"].asString().unwrap(),
+				iconData["gamemode"].asInt().unwrap(),
+				iconData["downloads"].asInt().unwrapOr(0),
+				iconData["description"].asString().unwrapOr(""),
+				iconData["format"].asString().unwrapOr(""));
+
+			//	If there's data of collaborators
+			auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
+			if (!collab.empty())
+			{
+				newIcon->addCollab(collab);
+			}
+
+			icons.push_back(newIcon);
+
+			IconCell *cell = IconCell::create(newIcon, ii % 2 == 0);
+			m_scrollLayer->m_contentLayer->addChild(cell);
+			cell->setPosition(0, (CELL_HEIGHT * fetchedIcons.size()) - CELL_HEIGHT * (ii + 1));
+			ii++;
 		}
 
-		icons.push_back(newIcon);
+		//	Fixes the scroll layer
+		int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
+		m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * fetchedIcons.size())));
+		m_scrollLayer->moveToTop();
 
-		IconCell *cell = IconCell::create(newIcon, ii % 2 == 0);
-		m_scrollLayer->m_contentLayer->addChild(cell);
-		cell->setPosition(0, (CELL_HEIGHT * fetchedIcons.size()) - CELL_HEIGHT * (ii + 1));
-		ii++;
+		m_prevBtn->setVisible(m_page > 0);
+		m_nextBtn->setVisible(m_page < m_maxPage);
 	}
-
-	//	Fixes the scroll layer
-	int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
-	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * fetchedIcons.size())));
-	m_scrollLayer->moveToTop();
-
-	m_prevBtn->setVisible(m_page > 0);
-	m_nextBtn->setVisible(m_page < m_maxPage);
 }
 
 void GalleryLayer::refreshGallery()
@@ -623,7 +640,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 	if (!popup || popup->m_cancelled)
 		return;
 
-	log::debug("Input = {} - Tag = {}", text, popup->getTag());
+	log::debug("SEARCH FILDER = {} - TAG = {} - IS EMPTY? = {}", text, popup->getTag(), text.empty());
 
 	if (popup->getTag() == 0)
 	{
@@ -632,7 +649,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 		m_searchFilter = text;
 
-		log::debug("Search filter updated");
+		log::debug("Search filter updated to {}", text);
 	}
 	else
 	{

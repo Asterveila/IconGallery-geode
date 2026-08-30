@@ -2,7 +2,9 @@
 
 ### <cy>v1.0.0-beta.2</c> (Latest)
 
-* <cg>Added</c> help button for a guide.
+* <cg>Added</c> new help segment for more info about the mod.
+* <cg>Added</c> bilingual descriptions on help and mod settings.
+* <cy>Fixed</c> possible bug when you reset the folder location.
 
 ### <co>v1.0.0-beta.1</c>
 
