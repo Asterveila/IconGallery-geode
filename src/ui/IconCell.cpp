@@ -1,7 +1,8 @@
 #include "IconCell.hpp"
 
 // someone doesn't wanna clutter init sorry
-float getDescThreshold() {
+float getDescThreshold()
+{
 	auto m_measureLine = CCLabelBMFont::create("A", "chatFont.fnt");
 	m_measureLine->setScale(0.5f);
 	float singleLineHeight = m_measureLine->getContentSize().height;
@@ -9,7 +10,8 @@ float getDescThreshold() {
 	return singleLineHeight * 2.f;
 }
 
-std::string removeTildes(std::string original) {
+std::string removeTildes(std::string original)
+{
 	std::string ret = original;
 
 	// god i wish there was an easier way to do this (idk if there is actually)
@@ -30,16 +32,17 @@ std::string removeTildes(std::string original) {
 
 // stolen from deltadash by asterveila
 // - sarah (asterveila)
-ccColor3B pastelizeColor(const ccColor3B& color, float factor = 0.4f) {
-    factor = std::max(0.0f, std::min(1.0f, factor));
-    
-    GLubyte r = static_cast<GLubyte>(color.r + (255 - color.r) * factor);
-    GLubyte g = static_cast<GLubyte>(color.g + (255 - color.g) * factor);
-    GLubyte b = static_cast<GLubyte>(color.b + (255 - color.b) * factor);
+ccColor3B pastelizeColor(const ccColor3B &color, float factor = 0.4f)
+{
+	factor = std::max(0.0f, std::min(1.0f, factor));
 
-    ccColor3B pastelized = ccColor3B({r, g, b});
-    
-    return pastelized;
+	GLubyte r = static_cast<GLubyte>(color.r + (255 - color.r) * factor);
+	GLubyte g = static_cast<GLubyte>(color.g + (255 - color.g) * factor);
+	GLubyte b = static_cast<GLubyte>(color.b + (255 - color.b) * factor);
+
+	ccColor3B pastelized = ccColor3B({r, g, b});
+
+	return pastelized;
 }
 
 bool IconCell::init(Icon *icon, bool even)
@@ -72,20 +75,25 @@ bool IconCell::init(Icon *icon, bool even)
 	m_preview->setLoadCallback(
 		[this, icon, scale](Result<> result)
 		{
-			if (!result.isOk()) {
-				if (m_previewAttempts < 3) {
+			if (!result.isOk())
+			{
+				if (m_previewAttempts < 3)
+				{
 					log::info("failed to load preview, please refresh Icon Gallery to try again");
 					m_preview->initWithFile("Placeholder.png"_spr);
-				} else {
+				}
+				else
+				{
 					m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
 					m_previewAttempts += 1;
 				}
-			} else {
+			}
+			else
+			{
 				m_preview->setScale(scale + getExtraScale(icon->m_gamemode) * CCDirector::sharedDirector()->getContentScaleFactor());
 			}
 		});
 	m_preview->loadFromUrl(m_icon->m_previewURL, geode::LazySprite::Format::kFmtPng);
-	//m_preview->setScale(scale);
 	this->addChildAtPosition(m_preview, Anchor::Left, ccp(35, 0), false);
 
 	//	Name of the Icon
@@ -95,7 +103,7 @@ bool IconCell::init(Icon *icon, bool even)
 	this->addChildAtPosition(m_iconName, Anchor::Left, ccp(70, m_size.height / 2.f - m_margin / 3.f), false);
 
 	std::string author = fmt::format("By {}", m_icon->m_author);
-	log::debug("Is collab? = {}", !m_icon->m_collaborators.empty());
+	//	log::debug("Is collab? = {}", !m_icon->m_collaborators.empty());
 
 	if (!m_icon->m_collaborators.empty())
 	{
@@ -130,7 +138,8 @@ bool IconCell::init(Icon *icon, bool even)
 
 	// Description
 	std::string m_noBsDesc = removeTildes(utils::string::replace(m_icon->m_description, "\n", " "));
-	if (m_noBsDesc.empty()) m_noBsDesc = "[No Description Provided]";
+	if (m_noBsDesc.empty())
+		m_noBsDesc = "[No Description Provided]";
 
 	auto m_descText = CCLabelBMFont::create(m_noBsDesc.c_str(), "chatFont.fnt");
 	m_descText->setAnchorPoint({0, 0.5f});
@@ -138,11 +147,12 @@ bool IconCell::init(Icon *icon, bool even)
 
 	float descWidth = 220.f;
 	float descScale = 0.5f;
-	
+
 	m_descText->setWidth(descWidth);
 	m_descText->limitLabelWidth(descWidth, descScale, 0.2f);
 
-	if (m_descText->getContentSize().height > getDescThreshold()) {
+	if (m_descText->getContentSize().height > getDescThreshold())
+	{
 		descWidth += 5.f;
 		descScale = 0.42f;
 
@@ -153,6 +163,7 @@ bool IconCell::init(Icon *icon, bool even)
 
 	this->addChildAtPosition(m_descText, Anchor::Left, {75, -7}, false);
 
+	//	Description Background
 	auto m_descBg = NineSlice::create("BlackSquare.png"_spr);
 	m_descBg->setContentSize({235.f, 26.f});
 	m_descBg->setAnchorPoint({0, 0.5f});
@@ -204,32 +215,35 @@ bool IconCell::init(Icon *icon, bool even)
 	return true;
 }
 
-float IconCell::getExtraScale(IconType type) {
+float IconCell::getExtraScale(IconType type)
+{
 	float ret = 0.f;
 
-	switch (type) {
-		case IconType::Cube:
-			ret = 0.35f;
-			break;
-		case IconType::Ball:
-			ret = 0.3f;
-			break;
-		case IconType::Wave:
-			ret = 0.35f;
-			break;
-		case IconType::Swing:
-			ret = 0.25f;
-			break;
-		default:
-			ret = 0.2f;
-			break;
+	switch (type)
+	{
+	case IconType::Cube:
+		ret = 0.35f;
+		break;
+	case IconType::Ball:
+		ret = 0.3f;
+		break;
+	case IconType::Wave:
+		ret = 0.35f;
+		break;
+	case IconType::Swing:
+		ret = 0.25f;
+		break;
+	default:
+		ret = 0.2f;
+		break;
 	}
 
 	return ret / 4;
 }
 
-CCNode* IconCell::getTagContainer() {
-	CCNode* m_tagContainer = CCNode::create();
+CCNode *IconCell::getTagContainer()
+{
+	CCNode *m_tagContainer = CCNode::create();
 	int m_tagMargin = 10;
 
 	// Gamemode Label
@@ -240,9 +254,10 @@ CCNode* IconCell::getTagContainer() {
 	const char *formatText = m_icon->m_format == IconFormat::Vanilla ? "Vanilla" : "More Icons";
 	auto m_formatLabel = CCLabelBMFont::create(formatText, "bigFont.fnt");
 	m_formatLabel->setColor({150, 150, 255});
-	//m_formatLabel->setScale(0.3f);
+	// m_formatLabel->setScale(0.3f);
 
-	if (m_icon->m_format == IconFormat::Vanilla) m_formatLabel->setColor({150, 255, 150});
+	if (m_icon->m_format == IconFormat::Vanilla)
+		m_formatLabel->setColor({150, 255, 150});
 
 	auto m_formatLabelSize = m_formatLabel->getContentSize();
 
@@ -266,17 +281,15 @@ CCNode* IconCell::getTagContainer() {
 	m_tagContainer->addChild(m_gamemodeBg);
 	m_tagContainer->addChild(m_formatBg);
 	m_tagContainer->setLayout(
-        RowLayout::create()
-            ->setGap(3.0f)
-            ->setAxisAlignment(AxisAlignment::Start)
-            ->setAxisReverse(false)
-			->setAutoGrowAxis(true)
-    );
+		RowLayout::create()
+			->setGap(3.0f)
+			->setAxisAlignment(AxisAlignment::Start)
+			->setAxisReverse(false)
+			->setAutoGrowAxis(true));
 	m_tagContainer->updateLayout();
 	m_tagContainer->setAnchorPoint({0, 0.5f});
 
 	return m_tagContainer;
-	
 }
 
 void IconCell::updateStatus()
@@ -284,7 +297,7 @@ void IconCell::updateStatus()
 	if (!m_icon)
 		return;
 
-	log::debug("Update called");
+	//	log::debug("Update called");
 
 	if (m_icon->isDownloading)
 	{
@@ -299,7 +312,7 @@ void IconCell::updateStatus()
 	if (m_icon->isDownloadSuccesful)
 	{
 		m_downloadBtn->setVisible(false);
-		log::debug("Succesfull Called");
+		//	log::debug("Succesfull Called");
 	}
 }
 
@@ -337,7 +350,7 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 
 	case IconType::Robot:
 		text = "Robot";
-		color = { 216, 216, 216 };
+		color = {216, 216, 216};
 		break;
 
 	case IconType::Spider:
@@ -360,9 +373,9 @@ CCLabelBMFont *IconCell::getGamemodeLabel(IconType gamemode)
 	}
 
 	auto label = CCLabelBMFont::create(text, "bigFont.fnt");
-	//label->setAnchorPoint({0, 0.5});
+	// label->setAnchorPoint({0, 0.5});
 	label->setColor(color);
-	//label->setScale(0.3f);
+	// label->setScale(0.3f);
 
 	return label;
 }
@@ -374,7 +387,7 @@ void IconCell::onDownload(CCObject *)
 	{
 		auto warning = createQuickPopup(
 			"Set Folder",
-			"Please set a Texture Pack folder in the settings of the mod to download icons",
+			"Please set a valid <cc>Texture Pack</c> location in the \"Icon pack folder\" settings of the mod to download icons.",
 			"Ok",
 			nullptr,
 			[](auto, auto) {});
@@ -397,22 +410,24 @@ void IconCell::onDownload(CCObject *)
 		});
 }
 
+/*
 void IconCell::onInfo(CCObject *)
 {
 	if (!m_icon)
-		return;
+	return;
 
 	std::string data =
-		"### Author: " + m_icon->m_author +
-		"\n***" +
-		"\n\n" + m_icon->m_description;
+	"### Author: " + m_icon->m_author +
+	"\n***" +
+	"\n\n" + m_icon->m_description;
 
 	MDPopup::create(
 		m_icon->m_name,
 		data,
 		"Ok")
 		->show();
-}
+	}
+*/
 
 IconCell *IconCell::create(Icon *m_icon, bool even)
 {

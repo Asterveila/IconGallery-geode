@@ -1,6 +1,21 @@
 # Changelog
 
-### <cy>v1.0.0-beta.1</c> (Latest)
+### <cy>v1.0.0-beta.2</c> (Latest)
+
+* <cg>Added</c> help information in English and Spanish.
+* <cg>Added</c> setting to download Vanilla icons as More Icons Format.
+* <cg>Added</c> better popup telling you to apply the texture pack.
+* <co>Reworked</c> settings to have both English and Spanish descriptions.
+* <cy>Fixed</c> bug when using search terms with a space character.
+* <cy>Fixed</c> bug when you reset the Icon Pack Folder setting.
+* <cy>Fixed</c> bug when API call returns zero icons.
+* <cr>Removed</c> monster.
+
+#### Known bugs:
+
+* <cr>I'm aware of a crash when using the searching feature constantly, looking for a fix in the meantime.</c>
+
+### <co>v1.0.0-beta.1</c>
 
 * First beta release.
 * <cg>Added</c> reload textures button.

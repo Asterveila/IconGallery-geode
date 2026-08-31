@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "../nodes/Icon.hpp"
 #include "GalleryLayer.hpp"
+#include "GalleryHelp.hpp"
 #include "IconCell.hpp"
 
 const int CELL_HEIGHT = 73;
@@ -85,36 +86,16 @@ bool GalleryLayer::init()
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
-	//	Buttons Menu
-	auto buttonMenu = CCMenu::create();
-	buttonMenu->setID("button-menu");
-	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
+	//	Left Button Menu (For settings and options)
+	auto leftButtonMenu = CCMenu::create();
+	leftButtonMenu->setAnchorPoint({0, 0});
+	leftButtonMenu->setLayout(ColumnLayout::create()
+								  ->setAxisAlignment(AxisAlignment::Start)
+								  ->setGap(0.5f));
 
-	m_pagesBtn = CCMenuItemSpriteExtra::create(
-		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_pagesBtn->setTag(0);
-	m_pagesBtn->setID("pages-button");
-	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
+	addChildAtPosition(leftButtonMenu, Anchor::BottomLeft, ccp(8, 8), false);
 
-	m_findBtn = CCMenuItemSpriteExtra::create(
-		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_findBtn->setTag(1);
-	m_findBtn->setID("search-button");
-	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -70), false);
-
-	m_authorBtn = CCMenuItemSpriteExtra::create(
-		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
-		this,
-		menu_selector(GalleryLayer::onFind));
-	m_authorBtn->setTag(2);
-	m_authorBtn->setID("author-button");
-	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -110), false);
-
-	//	Settings
+	//	Settings Button -- Self-explanatory
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.85f);
 
@@ -123,15 +104,15 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onSettings));
 	settingsBtn->setID("settings-button");
-	buttonMenu->addChildAtPosition(settingsBtn, Anchor::BottomLeft, ccp(30, 30), false);
 
+	//	Folder Button -- Displays the current location where all icons will be downloaded.
 	auto folderBtn = CCMenuItemSpriteExtra::create(
 		CircleButtonSprite::createWithSpriteFrameName("gj_folderBtn_001.png", 1, CircleBaseColor::Green, CircleBaseSize::SmallAlt),
 		this,
 		menu_selector(GalleryLayer::onFolder));
 	folderBtn->setID("folder-button");
-	buttonMenu->addChildAtPosition(folderBtn, Anchor::BottomLeft, ccp(30, 75), false);
 
+	//	Restart Button -- Reloads the textures of the game (to load up the icons)
 	auto restartSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
 	restartSpr->setScale(0.9f);
 
@@ -140,7 +121,55 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onReset));
 	restartBtn->setID("reload-textures-button");
-	buttonMenu->addChildAtPosition(restartBtn, Anchor::BottomLeft, ccp(30, 120), false);
+
+	//	Help Button -- Displays a guide on how the Icon Gallery works.
+	auto helpSpr = CCSprite::createWithSpriteFrameName("GJ_helpBtn_001.png");
+	helpSpr->setScale(1.1f);
+
+	auto helpBtn = CCMenuItemSpriteExtra::create(
+		helpSpr,
+		this,
+		menu_selector(GalleryLayer::onHelp));
+	helpBtn->setID("help-button");
+
+	//	Adds the buttons to the menu
+	leftButtonMenu->addChild(settingsBtn);
+	leftButtonMenu->addChild(folderBtn);
+	leftButtonMenu->addChild(restartBtn);
+	leftButtonMenu->addChild(helpBtn);
+	leftButtonMenu->updateLayout();
+
+	//	Buttons Menu
+	auto buttonMenu = CCMenu::create();
+	buttonMenu->setID("button-menu");
+	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
+
+	//	Button to get to a specific Page
+	m_pagesBtn = CCMenuItemSpriteExtra::create(
+		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_pagesBtn->setTag(0);
+	m_pagesBtn->setID("pages-button");
+	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
+
+	//	Search -- Searches Icons by the Name
+	m_findBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_findBtn->setTag(1);
+	m_findBtn->setID("search-button");
+	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -65), false);
+
+	//	Search Author -- Searches Icons by the Author Name
+	m_authorBtn = CCMenuItemSpriteExtra::create(
+		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
+		this,
+		menu_selector(GalleryLayer::onFind));
+	m_authorBtn->setTag(2);
+	m_authorBtn->setID("author-button");
+	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -100), false);
 
 	//	Socials
 	auto discordBtn = CCMenuItemSpriteExtra::create(
@@ -235,17 +264,28 @@ void GalleryLayer::setupIconPack()
 
 					auto packPath = directory / "Icon Gallery";
 
-					if (!utils::file::writeString(packPath / "pack.json", json.dump()))
+					if (utils::file::writeString(packPath / "pack.json", json.dump()))
 					{
-						Notification::create("Error while creating the pack.json", NotificationIcon::Error)->show();
-						log::error("There was an error creating the Pack.json");
+						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
+						auto popupSucess = createQuickPopup(
+							"Icon Pack created!",
+							"You can now download icons! To apply them, head to <cg>Texture Loader</c>, move the texture pack named \"<co>Downloaded Icons</c>\" to the right column and reload the textures.",
+							"OK",
+							nullptr,
+							[](auto, auto) {});
+						log::info("Texture Pack for Icon Gallery generated.");
 					}
 					else
 					{
-						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
-						Notification::create("Icon Pack succesfully created!", NotificationIcon::Success)->show();
-						log::debug("Pack.json succesfully written!");
+						Notification::create("Error: Failed creating Pack.json", NotificationIcon::Error)->show();
+						log::error("There was an error while creating the Pack.json");
 					}
+				}
+				else if (std::filesystem::exists(directory / "Icon Gallery"))
+				{
+					Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", directory / "Icon Gallery");
+					Notification::create("Icon Pack found!", NotificationIcon::Success)->show();
+					log::info("Texture Pack found in the Loader, assigned the settings value to it");
 				}
 				else
 				{
@@ -257,7 +297,7 @@ void GalleryLayer::setupIconPack()
 			{
 				auto warning = createQuickPopup(
 					"Set Folder",
-					"Please set a Texture Pack folder in the settings of the mod to download icons",
+					"Please set a location (Icon Pack Folder) in the settings of the mod to download icons",
 					"Ok",
 					nullptr,
 					[](auto, auto) {});
@@ -337,11 +377,15 @@ void GalleryLayer::fetchGallery()
 
 	//	Author
 	if (!m_authorFilter.empty())
-		url = fmt::format("{}&artist={}", url, m_authorFilter);
+	{
+		url = fmt::format("{}&artist={}", url, utils::string::replace(m_authorFilter, " ", "+"));
+	}
 
 	//	Query
 	if (!m_searchFilter.empty())
-		url = fmt::format("{}&query={}", url, m_searchFilter);
+	{
+		url = fmt::format("{}&query={}", url, utils::string::replace(m_searchFilter, " ", "+"));
+	}
 
 	log::debug("URL = {}", url);
 
@@ -399,46 +443,59 @@ void GalleryLayer::loadGallery()
 	}
 
 	auto fetchedIcons = m_fetchedData["icons"];
+	auto count = m_fetchedData["totalIcons"].asInt().unwrapOr(0);
 
-	std::vector<Icon *> icons = {};
-	int ii = 0;
+	log::debug("Icons Count = {}", count);
 
-	for (auto &value : fetchedIcons)
+	if (m_fetchedData["totalIcons"].asInt().unwrapOr(0) == 0)
 	{
-		auto iconData = value;
+		m_errorLabel = CCLabelBMFont::create("No icons found.", "goldFont.fnt");
+		this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
+		m_errorLabel->setID("error-text");
+		m_errorLabel->setScale(0.6f);
+	}
+	else
+	{
+		std::vector<Icon *> icons = {};
+		int ii = 0;
 
-		Icon *newIcon = Icon::create(
-			iconData["iconName"].asString().unwrap(),
-			iconData["author"].asString().unwrap(),
-			iconData["filename"].asString().unwrap(),
-			iconData["previewUrl"].asString().unwrap(),
-			iconData["gamemode"].asInt().unwrap(),
-			iconData["downloads"].asInt().unwrapOr(0),
-			iconData["description"].asString().unwrapOr(""),
-			iconData["format"].asString().unwrapOr(""));
-
-		//	If there's data of collaborators
-		auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
-		if (!collab.empty())
+		for (auto &value : fetchedIcons)
 		{
-			newIcon->addCollab(collab);
+			auto iconData = value;
+
+			Icon *newIcon = Icon::create(
+				iconData["iconName"].asString().unwrap(),
+				iconData["author"].asString().unwrap(),
+				iconData["filename"].asString().unwrap(),
+				iconData["previewUrl"].asString().unwrap(),
+				iconData["gamemode"].asInt().unwrap(),
+				iconData["downloads"].asInt().unwrapOr(0),
+				iconData["description"].asString().unwrapOr(""),
+				iconData["format"].asString().unwrapOr(""));
+
+			//	If there's data of collaborators
+			auto collab = iconData["collaborators"].as<std::vector<std::string>>().unwrap();
+			if (!collab.empty())
+			{
+				newIcon->addCollab(collab);
+			}
+
+			icons.push_back(newIcon);
+
+			IconCell *cell = IconCell::create(newIcon, ii % 2 == 0);
+			m_scrollLayer->m_contentLayer->addChild(cell);
+			cell->setPosition(0, (CELL_HEIGHT * fetchedIcons.size()) - CELL_HEIGHT * (ii + 1));
+			ii++;
 		}
 
-		icons.push_back(newIcon);
+		//	Fixes the scroll layer
+		int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
+		m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * fetchedIcons.size())));
+		m_scrollLayer->moveToTop();
 
-		IconCell *cell = IconCell::create(newIcon, ii % 2 == 0);
-		m_scrollLayer->m_contentLayer->addChild(cell);
-		cell->setPosition(0, (CELL_HEIGHT * fetchedIcons.size()) - CELL_HEIGHT * (ii + 1));
-		ii++;
+		m_prevBtn->setVisible(m_page > 0);
+		m_nextBtn->setVisible(m_page < m_maxPage);
 	}
-
-	//	Fixes the scroll layer
-	int iconCount = m_scrollLayer->m_contentLayer->getChildrenCount();
-	m_scrollLayer->m_contentLayer->setContentSize(ccp(m_scrollLayer->m_contentLayer->getContentSize().width, (CELL_HEIGHT * fetchedIcons.size())));
-	m_scrollLayer->moveToTop();
-
-	m_prevBtn->setVisible(m_page > 0);
-	m_nextBtn->setVisible(m_page < m_maxPage);
 }
 
 void GalleryLayer::refreshGallery()
@@ -588,7 +645,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 	if (!popup || popup->m_cancelled)
 		return;
 
-	log::debug("Input = {} - Tag = {}", text, popup->getTag());
+	log::debug("SEARCH FILDER = {} - TAG = {} - IS EMPTY? = {}", text, popup->getTag(), text.empty());
 
 	if (popup->getTag() == 0)
 	{
@@ -597,7 +654,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 		m_searchFilter = text;
 
-		log::debug("Search filter updated");
+		log::debug("Search filter updated to {}", text);
 	}
 	else
 	{
@@ -625,6 +682,11 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 	m_page = 0;
 	fetchGallery();
+}
+
+void GalleryLayer::onHelp(CCObject *)
+{
+	GalleryHelpPopup::create()->show();
 }
 
 void GalleryLayer::onSettings(CCObject *)
