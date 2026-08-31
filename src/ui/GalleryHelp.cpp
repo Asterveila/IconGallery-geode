@@ -160,23 +160,25 @@ void GalleryHelpPopup::setInfo()
 	case 1:
 		//	HOW TO USE
 		info = fmt::format(
-			"{}{}{}{}{}{}",
+			"{}{}{}{}{}{}{}",
 			"# How to Use",
 			"\nThe mod will automatically set up a <cc>Texture Pack</c> upon start-up, where all the icons downloaded from the gallery will be saved by default.",
 			"\n\nThe mod does **NOT** automatically apply the texture pack, so you have to do that yourself inside the <cg>Texture Loader</c> manager.",
 			"\n***\n### Other Locations:",
-			"\nIn the settings, you can enable special locations to download icons if you don't want a texture pack, such as the More Icons folder (for general) or the original icons (for vanilla).",
+			"\nYou can enable some extra locations where downloaded icons end up in the settings.",
+			"\n\nLocations such as the folders within the <cl>More Icons</c> Mod (in general) or the original resources folder of the game (for <cf>Vanilla</c> icons).",
 			"\n\n<cr>Be advised, that you could override icons that are already there</c>.");
 
 		if (m_spanish)
 		{
 			info = fmt::format(
-				"{}{}{}{}{}{}",
+				"{}{}{}{}{}{}{}",
 				"# Como Usar",
 				"\nEl mod te crea automaticamente un <cc>Texture Pack</c> al inicio, ahi es donde todos los iconos descargados de la galeria seran guardados por default.",
 				"\n\nEl mod **NO** aplica automaticamente el Texture Pack, tienes que hacerlo tu mismo dentro del manager de <cg>Texture Loader</c>.",
 				"\n***\n### Otros Lugares:",
 				"\nEn la configuracion, tu puedes activar otros lugares donde los iconos descargados terminaran si no quieres un texture pack, como la carpeta de More Icons (en general) o la carpeta de los iconos del juego (para los de formato vanilla).",
+				"\n\nLugares como las carpetas dentro del <cl>Mod de More Icons</c> (en general) o los recursos originales del juego (para iconos <cf>Vanilla</>).",
 				"\n\n<cr>Ten en cuenta, que podrias reemplazar iconos que ya esten ahi</c>.");
 		}
 		break;
@@ -188,8 +190,8 @@ void GalleryHelpPopup::setInfo()
 			"# Downloading Icons",
 			"\nOnce you find the icons you wish to download, simply click the \"<co>Download</c>\" button at the right side of the icon.",
 			"\n***\n### Formats:",
-			"\n* **Icons with the \"<cf>Vanilla</c>\" format** are found inside the \"Icons\" folder of the Texture Pack.",
-			"\n* **Icons with the \"<cp>More Icons</c>\" format** are found inside their gamemode-specific folder of <cl>More Icons</c>.",
+			"\n* **Icons with the <cf>Vanilla</c> format** are found inside the \"Icons\" folder of the Texture Pack.",
+			"\n* **Icons with the <cp>More Icons</c> format** are found inside their gamemode-specific folder of <cl>More Icons</c>.",
 			"\n***\n### Vanilla as More Icons",
 			"\nIf you have the <cy>**Vanilla as More Icons**</c> setting enabled, all icons you download will be treated as the <cp>More Icons</c> format.");
 

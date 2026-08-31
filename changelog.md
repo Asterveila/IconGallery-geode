@@ -4,9 +4,12 @@
 
 * <cg>Added</c> help information in English and Spanish.
 * <cg>Added</c> setting to download Vanilla icons as More Icons Format.
-* <co>rewritten</c> settings to have both English and Spanish descriptions.
-* <cy>Fixed</c> possible bug when you reset the folder location.
-* <cy>Fixed</c> bugged popup when no icons are found.
+* <cg>Added</c> better popup telling you to apply the texture pack.
+* <co>Reworked</c> settings to have both English and Spanish descriptions.
+* <cy>Fixed</c> bug when using search terms with a space character.
+* <cy>Fixed</c> bug when you reset the Icon Pack Folder setting.
+* <cy>Fixed</c> bug when API call returns zero icons.
+* <cr>Removed</c> monster.
 
 #### Known bugs:
 

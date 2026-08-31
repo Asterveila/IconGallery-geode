@@ -27,7 +27,7 @@
 				"Recent",
 				"Most Downloaded"
 			],
-			"default": "Most Downloaded"
+			"default": "Recent"
 		},
 		"vanilla-more-icons": {
 			"type": "bool",

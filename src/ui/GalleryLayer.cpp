@@ -264,23 +264,28 @@ void GalleryLayer::setupIconPack()
 
 					auto packPath = directory / "Icon Gallery";
 
-					if (!utils::file::writeString(packPath / "pack.json", json.dump()))
+					if (utils::file::writeString(packPath / "pack.json", json.dump()))
 					{
-						Notification::create("Error while creating the pack.json", NotificationIcon::Error)->show();
-						log::error("There was an error creating the Pack.json");
+						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
+						auto popupSucess = createQuickPopup(
+							"Icon Pack created!",
+							"You can now download icons! To apply them, head to <cg>Texture Loader</c>, move the texture pack named \"<co>Downloaded Icons</c>\" to the right column and reload the textures.",
+							"OK",
+							nullptr,
+							[](auto, auto) {});
+						log::info("Texture Pack for Icon Gallery generated.");
 					}
 					else
 					{
-						Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", packPath);
-						Notification::create("Icon Pack succesfully created!", NotificationIcon::Success)->show();
-						log::debug("Pack.json succesfully written!");
+						Notification::create("Error: Failed creating Pack.json", NotificationIcon::Error)->show();
+						log::error("There was an error while creating the Pack.json");
 					}
 				}
 				else if (std::filesystem::exists(directory / "Icon Gallery"))
 				{
 					Mod::get()->setSettingValue<std::filesystem::path>("icon-pack-folder", directory / "Icon Gallery");
 					Notification::create("Icon Pack found!", NotificationIcon::Success)->show();
-					log::debug("Pack folder found in Texture loader, assigned value to it");
+					log::info("Texture Pack found in the Loader, assigned the settings value to it");
 				}
 				else
 				{
@@ -292,7 +297,7 @@ void GalleryLayer::setupIconPack()
 			{
 				auto warning = createQuickPopup(
 					"Set Folder",
-					"Please set a Texture Pack folder in the settings of the mod to download icons",
+					"Please set a location (Icon Pack Folder) in the settings of the mod to download icons",
 					"Ok",
 					nullptr,
 					[](auto, auto) {});
@@ -372,11 +377,15 @@ void GalleryLayer::fetchGallery()
 
 	//	Author
 	if (!m_authorFilter.empty())
-		url = fmt::format("{}&artist={}", url, m_authorFilter);
+	{
+		url = fmt::format("{}&artist={}", url, utils::string::replace(m_authorFilter, " ", "+"));
+	}
 
 	//	Query
 	if (!m_searchFilter.empty())
-		url = fmt::format("{}&query={}", url, m_searchFilter);
+	{
+		url = fmt::format("{}&query={}", url, utils::string::replace(m_searchFilter, " ", "+"));
+	}
 
 	log::debug("URL = {}", url);
 

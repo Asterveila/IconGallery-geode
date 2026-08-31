@@ -387,7 +387,7 @@ void IconCell::onDownload(CCObject *)
 	{
 		auto warning = createQuickPopup(
 			"Set Folder",
-			"Please set a Texture Pack folder in the settings of the mod to download icons",
+			"Please set a valid <cc>Texture Pack</c> location in the \"Icon pack folder\" settings of the mod to download icons.",
 			"Ok",
 			nullptr,
 			[](auto, auto) {});
