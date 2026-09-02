@@ -108,8 +108,24 @@ void Icon::downloadIcon()
 			}
 			else
 			{
-				Notification::create("There was an error", NotificationIcon::Error)->show();
-				log::error("Failed on loading data - {}", res.errorMessage());
+				if (res.ok())
+				{
+					auto errorPopup = createQuickPopup(
+						"Error: Icon Not Found",
+						fmt::format("The files of this icon got corrupted. Please report the icon (<cy>{}</c>) to the Gallery Admins in the <cd>Discord Server</c>.", this->m_name).c_str(),
+						"Ok",
+						nullptr,
+						[](auto, auto) {});
+				}
+				else if (res.error())
+				{
+					auto errorPopup = createQuickPopup(
+						"Error: No Internet",
+						"Couldn't download icon, try again later.",
+						"Ok",
+						nullptr,
+						[](auto, auto) {});
+				}
 			}
 		});
 };
@@ -134,11 +150,13 @@ void Icon::unpackIcon()
 	std::filesystem::path unzipDir = (m_format == IconFormat::MoreIcons) || Mod::get()->getSettingValue<bool>("vanilla-more-icons") ? (path / "config" / "hiimjustin000.more_icons" / gamemode) : (path / "icons");
 
 	//	Special locations (if their settings are enabled)
-	if(m_format == IconFormat::Vanilla && Mod::get()->getSettingValue<bool>("resources-folder")){
+	if (m_format == IconFormat::Vanilla && Mod::get()->getSettingValue<bool>("resources-folder"))
+	{
 		log::debug("Resources Folder Enabled");
 		unzipDir = geode::dirs::getResourcesDir() / "icons";
-
-	} else if(Mod::get()->getSettingValue<bool>("more-icons-folder")){
+	}
+	else if (Mod::get()->getSettingValue<bool>("more-icons-folder"))
+	{
 		log::debug("More Icons Folder Enabled");
 		unzipDir = Loader::get()->getInstalledMod("hiimjustin000.more_icons")->getConfigDir() / gamemode;
 	}
