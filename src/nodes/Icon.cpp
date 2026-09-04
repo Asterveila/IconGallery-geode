@@ -104,11 +104,8 @@ void Icon::downloadIcon()
 								}
 							});
 					}
-				};
-			}
-			else
-			{
-				if (res.ok())
+				}
+				else
 				{
 					auto errorPopup = createQuickPopup(
 						"Error: Icon Not Found",
@@ -117,7 +114,10 @@ void Icon::downloadIcon()
 						nullptr,
 						[](auto, auto) {});
 				}
-				else if (res.error())
+			}
+			else
+			{
+				if (res.error())
 				{
 					auto errorPopup = createQuickPopup(
 						"Error: No Internet",
@@ -126,6 +126,17 @@ void Icon::downloadIcon()
 						nullptr,
 						[](auto, auto) {});
 				}
+				else
+				{
+					auto errorPopup = createQuickPopup(
+						"Error: Icon Not Found",
+						fmt::format("The files of this icon got corrupted. Please report the icon (<cy>{}</c>) to the Gallery Admins in the <cd>Discord Server</c>.", this->m_name).c_str(),
+						"Ok",
+						nullptr,
+						[](auto, auto) {});
+				}
+
+				log::debug("Error while Downloading the Icon: {}", res.errorMessage());
 			}
 		});
 };
