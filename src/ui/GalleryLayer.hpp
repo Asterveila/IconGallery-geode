@@ -4,12 +4,6 @@
 #include <Geode/loader/Mod.hpp>
 using namespace geode::prelude;
 
-enum GallerySort
-{
-	Recent,
-	MostDownloaded
-};
-
 class GalleryLayer : public CCLayer, public SetIDPopupDelegate, public SetTextPopupDelegate
 {
 protected:
@@ -31,6 +25,7 @@ protected:
 	virtual bool init() override;
 	virtual void keyBackClicked() override;
 
+	//	Creating Sprites
 	CCSprite *getModeSprite(int tag, bool active);
 	void createModeButton(int tag, bool active = 0);
 	void setIDPopupClosed(SetIDPopup *popup, int value) override;
@@ -47,13 +42,12 @@ protected:
 	void fetchURL();
 
 public:
-	gd::string m_authorFilter = "";
+	IconType m_mode = IconType::Item;
 	gd::string m_searchFilter = "";
+	gd::string m_authorFilter = "";
+
 	unsigned int m_page = 0;
 	unsigned int m_maxPage = 999;
-	GallerySort m_sort = GallerySort::MostDownloaded;
-	IconType m_mode = IconType::Item;
-
 	unsigned int m_activeBtn = 0;
 	bool m_isFilterActive = false;
 
