@@ -1,5 +1,11 @@
 # Changelog
 
+### <cy>v1.0.0-beta.3</c> (Latest)
+
+* <co>Reworked</c> error labeling, hopefully to reduce chances of crashing.
+* <co>Reworked</c> notification if an icon fails to download.
+* <cy>Fixed</c> some typos.
+
 ### <cy>v1.0.0-beta.2</c> (Latest)
 
 * <cg>Added</c> help information in English and Spanish.

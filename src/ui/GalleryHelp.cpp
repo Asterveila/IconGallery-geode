@@ -271,7 +271,7 @@ void GalleryHelpPopup::setInfo()
 			info = fmt::format(
 				"{}{}",
 				"# Soporte",
-				"\nSi encuentras un bug del mod mismo o deseas ayudar el desarrollo de la galeria (ya sea el Mod o la pagina web) de alguna manera, asegurate de contactarnos a travs del [Repositorio Github](https://github.com/MasterL500/IconGallery-geode) o por medio del [Servidor de Discord](https://discord.gg/dceY3uvGzD).");
+				"\nSi encuentras un bug del mod mismo o deseas ayudar el desarrollo de la galeria (ya sea el Mod o la pagina web) de alguna manera, asegurate de contactarnos a traves del [Repositorio Github](https://github.com/MasterL500/IconGallery-geode) o por medio del [Servidor de Discord](https://discord.gg/dceY3uvGzD).");
 		}
 		break;
 	}
