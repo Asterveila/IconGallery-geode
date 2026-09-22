@@ -29,64 +29,59 @@ bool GalleryLayer::init()
 	auto title = CCSprite::create("GalleryLabel.png"_spr);
 	addChildAtPosition(title, Anchor::Top, ccp(0, -30), false);
 
-	//	Page Numbering
-	m_pageLabel = CCLabelBMFont::create("", "goldFont.fnt");
-	m_pageLabel->limitLabelWidth(200.0f, 0.5f, 0.5f);
-	m_pageLabel->setAnchorPoint({1, 1});
-	m_pageLabel->setVisible(false);
-	addChildAtPosition(m_pageLabel, Anchor::TopRight, ccp(-10, -10), false);
-
-	//  Back Button
+	//  Back Button Menu
 	auto backMenu = CCMenu::create();
 	backMenu->setID("back-menu");
 	addChildAtPosition(backMenu, Anchor::TopLeft, ccp(24, -24), false);
 
+	//	Back Button
 	auto backBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
 		this,
 		menu_selector(GalleryLayer::onBack));
-	backBtn->setID("back-button");
 	backBtn->setSizeMult(1.2f);
+	backBtn->setID("back-button");
 	backMenu->addChild(backBtn);
 
-	//	Pages Menu
+	//	Center Menu -- Page Navigation
 	m_pagesMenu = CCMenu::create();
 	m_pagesMenu->setID("pages-menu");
 	addChildAtPosition(m_pagesMenu, Anchor::BottomLeft, ccp(0, 0), false);
 
-	//  Page Navigation Buttons
+	//  Previous Page Button
 	m_prevBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
 		this,
 		menu_selector(GalleryLayer::onPage));
-	m_prevBtn->setID("prev-page-button");
-	m_prevBtn->setVisible(false);
 	m_prevBtn->setTag(-1);
+	m_prevBtn->setVisible(false);
+	m_prevBtn->setID("prev-page-button");
+	m_pagesMenu->addChildAtPosition(m_prevBtn, Anchor::Center, ccp(-216, 0), false);
 
+	//	Next Page Button
 	auto nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 	nextSpr->setFlipX(true);
+
 	m_nextBtn = CCMenuItemSpriteExtra::create(
 		nextSpr,
 		this,
 		menu_selector(GalleryLayer::onPage));
-	m_nextBtn->setID("next-page-button");
-	m_nextBtn->setVisible(false);
 	m_nextBtn->setTag(1);
-
-	m_pagesMenu->addChildAtPosition(m_prevBtn, Anchor::Center, ccp(-216, 0), false);
+	m_nextBtn->setVisible(false);
+	m_nextBtn->setID("next-page-button");
 	m_pagesMenu->addChildAtPosition(m_nextBtn, Anchor::Center, ccp(216, 0), false);
 
-	//	Gamemodes Menu
+	//	Bottom Menu -- For searching by Gamemode
 	m_modesMenu = CCMenu::create();
-	m_modesMenu->setID("gamemodes-menu");
 	m_modesMenu->setLayout(RowLayout::create()->setGap(2.5f));
+	m_modesMenu->setID("gamemodes-menu");
 	addChildAtPosition(m_modesMenu, Anchor::Bottom, ccp(0, 30), false);
 
-	//	For the Gamemodes
+	//	Creates the buttons for every gamemode (and All)
 	for (int ii = 0; ii < 10; ii++)
 		createModeButton(ii, ii == 0);
 
-	//	Left Button Menu (For settings and options)
+	//	Left Button Menu -- For Settings and options
 	auto leftButtonMenu = CCMenu::create();
 	leftButtonMenu->setAnchorPoint({0, 0});
 	leftButtonMenu->setLayout(ColumnLayout::create()
@@ -104,6 +99,8 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onSettings));
 	settingsBtn->setID("settings-button");
+	leftButtonMenu->addChild(settingsBtn);
+	leftButtonMenu->updateLayout();
 
 	//	Folder Button -- Displays the current location where all icons will be downloaded.
 	auto folderBtn = CCMenuItemSpriteExtra::create(
@@ -111,6 +108,8 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onFolder));
 	folderBtn->setID("folder-button");
+	leftButtonMenu->addChild(folderBtn);
+	leftButtonMenu->updateLayout();
 
 	//	Restart Button -- Reloads the textures of the game (to load up the icons)
 	auto restartSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
@@ -121,6 +120,8 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onReset));
 	restartBtn->setID("reload-textures-button");
+	leftButtonMenu->addChild(restartBtn);
+	leftButtonMenu->updateLayout();
 
 	//	Help Button -- Displays a guide on how the Icon Gallery works.
 	auto helpSpr = CCSprite::createWithSpriteFrameName("GJ_helpBtn_001.png");
@@ -131,20 +132,15 @@ bool GalleryLayer::init()
 		this,
 		menu_selector(GalleryLayer::onHelp));
 	helpBtn->setID("help-button");
-
-	//	Adds the buttons to the menu
-	leftButtonMenu->addChild(settingsBtn);
-	leftButtonMenu->addChild(folderBtn);
-	leftButtonMenu->addChild(restartBtn);
 	leftButtonMenu->addChild(helpBtn);
 	leftButtonMenu->updateLayout();
 
-	//	Buttons Menu
+	//	Other Buttons Menu
 	auto buttonMenu = CCMenu::create();
 	buttonMenu->setID("button-menu");
 	addChildAtPosition(buttonMenu, Anchor::BottomLeft, ccp(0, 0), false);
 
-	//	Button to get to a specific Page
+	//	Button -- Moving to a specific page
 	m_pagesBtn = CCMenuItemSpriteExtra::create(
 		ButtonSprite::create(fmt::format("{}", m_page + 1).c_str(), 20, 20, 0.8f, true, "bigFont.fnt", "GJ_button_01.png"),
 		this,
@@ -153,7 +149,7 @@ bool GalleryLayer::init()
 	m_pagesBtn->setID("pages-button");
 	buttonMenu->addChildAtPosition(m_pagesBtn, Anchor::TopRight, ccp(-25, -50), false);
 
-	//	Search -- Searches Icons by the Name
+	//	Search -- Searches Icons by Name
 	m_findBtn = CCMenuItemSpriteExtra::create(
 		EditorButtonSprite::createWithSprite("Search.png"_spr, 1.2f),
 		this,
@@ -162,7 +158,7 @@ bool GalleryLayer::init()
 	m_findBtn->setID("search-button");
 	buttonMenu->addChildAtPosition(m_findBtn, Anchor::TopLeft, ccp(25, -65), false);
 
-	//	Search Author -- Searches Icons by the Author Name
+	//	Search -- Searching Icons by Author
 	m_authorBtn = CCMenuItemSpriteExtra::create(
 		EditorButtonSprite::createWithSprite("SearchAuthor.png"_spr, 1.2f),
 		this,
@@ -171,7 +167,7 @@ bool GalleryLayer::init()
 	m_authorBtn->setID("author-button");
 	buttonMenu->addChildAtPosition(m_authorBtn, Anchor::TopLeft, ccp(25, -100), false);
 
-	//	Socials
+	//	Socials -- Discord Button
 	auto discordBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"),
 		this,
@@ -179,6 +175,7 @@ bool GalleryLayer::init()
 	discordBtn->setID("discord-button");
 	buttonMenu->addChildAtPosition(discordBtn, Anchor::BottomRight, ccp(-25, 60), false);
 
+	//	Socials -- Website Bytton
 	auto websiteBtn = CCMenuItemSpriteExtra::create(
 		CCSprite::create("WebsiteIcon.png"_spr),
 		this,
@@ -188,16 +185,30 @@ bool GalleryLayer::init()
 
 	//	Scroll Layer
 	m_scrollLayer = ScrollLayer::create({357, 220});
-	m_scrollLayer->setID("scroll-layer");
 	m_scrollLayer->setZOrder(-2);
+	m_scrollLayer->setID("scroll-layer");
 	this->addChildAtPosition(m_scrollLayer, Anchor::Center, ccp(-178, -110), false);
+
+	//	Page Number Label
+	m_pageLabel = CCLabelBMFont::create("", "goldFont.fnt");
+	m_pageLabel->limitLabelWidth(200.0f, 0.5f, 0.5f);
+	m_pageLabel->setAnchorPoint({1, 1});
+	m_pageLabel->setVisible(false);
+	m_pageLabel->setID("pages-label");
+	addChildAtPosition(m_pageLabel, Anchor::TopRight, ccp(-10, -10), false);
 
 	//	Loading Circle
 	m_loading = LoadingCircleSprite::create(1);
-	m_loading->setID("loading");
 	m_loading->setVisible(false);
 	m_loading->setScale(0.6f);
+	m_loading->setID("loading");
 	this->addChildAtPosition(m_loading, Anchor::Center, ccp(0, 0), false);
+
+	//	Error Message
+	m_errorLabel = CCLabelBMFont::create("", "goldFont.fnt");
+	m_errorLabel->setID("error-message");
+	m_errorLabel->setScale(0.6f);
+	this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
 
 	//	If there's no "Icon Pack" settled (via settings), creates one.
 	auto noPackExists = Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty();
@@ -207,13 +218,13 @@ bool GalleryLayer::init()
 			CCDelayTime::create(1.f),
 			CCCallFunc::create(this, callfunc_selector(GalleryLayer::setupIconPack)),
 			0));
-	};
+	}
 
-	//	Calls teh function to fetch the Gallery.
+	//	Calls the function to get the API URL
 	fetchURL();
 
-	setKeyboardEnabled(true);
 	setKeypadEnabled(true);
+	setKeyboardEnabled(true);
 
 	this->setID("icon-gallery-layer");
 	return true;
@@ -308,7 +319,9 @@ void GalleryLayer::setupIconPack()
 void GalleryLayer::fetchURL()
 {
 	auto req = web::WebRequest();
+	log::debug("Fetching Gallery API URL from the website...");
 
+	//	Does the request to get the API URL
 	m_fetchListener.spawn(
 		req.get("https://iconsgallery.pages.dev/assets/API_BASE.txt"),
 		[this](web::WebResponse res)
@@ -316,25 +329,37 @@ void GalleryLayer::fetchURL()
 			if (res.ok())
 			{
 				auto prevURL = Mod::get()->getSavedValue<std::string>("API");
-				auto newURL = utils::string::replace(res.string().unwrap(), "\n", "");
+				auto fetchedData = res.string().unwrap();
+				auto newURL = utils::string::replace(fetchedData, "\n", "");
 
-				if ((std::string_view(prevURL) != std::string_view(newURL)) || prevURL.empty())
+				// No previous data found? Assign website
+				if (prevURL.empty())
+				{
 					Mod::get()->setSavedValue<std::string>("API", newURL);
+					log::debug("API base not settled, assigning new data.");
+				}
 
+				// New URL is different from saved? Change it
+				if (!prevURL.empty() && std::string_view(prevURL) != std::string_view(newURL))
+				{
+					Mod::get()->setSavedValue<std::string>("API", newURL);
+					log::debug("API base found, and now updating to new version.");
+				}
+
+				// If everything went well, go fetch the gallery.
+				log::debug("API base found, now calling the FetchGallery()");
 				fetchGallery();
 			}
 			else
 			{
-				Notification::create("Error while fetching API", NotificationIcon::Error)->show();
-				log::error("There was an error fetching the URL from website");
+				log::error("Could not get the API from the website");
+				log::error("Error: {}", res.errorMessage());
 
 				if (m_errorLabel)
-					m_errorLabel->removeMeAndCleanup();
-
-				m_errorLabel = CCLabelBMFont::create(fmt::format("Something went wrong (Error {})", res.code()).c_str(), "goldFont.fnt");
-				this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
-				m_errorLabel->setID("error-text");
-				m_errorLabel->setScale(0.6f);
+				{
+					m_errorLabel->setCString(fmt::format("Something went wrong (Error {})", res.code()).c_str());
+					m_errorLabel->setVisible(true);
+				}
 
 				this->runAction(CCSequence::create(
 					CCDelayTime::create(1.f),
@@ -356,7 +381,7 @@ void GalleryLayer::fetchGallery()
 		m_loading->setVisible(true);
 
 	if (m_errorLabel)
-		m_errorLabel->removeMeAndCleanup();
+		m_errorLabel->setVisible(false);
 
 	//	Main URL
 	std::string url = fmt::format("{}/api/index", Mod::get()->getSavedValue<std::string>("API"));
@@ -375,19 +400,15 @@ void GalleryLayer::fetchGallery()
 	if (m_mode != IconType::Item)
 		url = fmt::format("{}&mode={}", url, (int)m_mode);
 
-	//	Author
-	if (!m_authorFilter.empty())
-	{
-		url = fmt::format("{}&artist={}", url, utils::string::replace(m_authorFilter, " ", "+"));
-	}
-
-	//	Query
+	//	Search name filter
 	if (!m_searchFilter.empty())
-	{
 		url = fmt::format("{}&query={}", url, utils::string::replace(m_searchFilter, " ", "+"));
-	}
 
-	log::debug("URL = {}", url);
+	//	Search Author filter
+	if (!m_authorFilter.empty())
+		url = fmt::format("{}&artist={}", url, utils::string::replace(m_authorFilter, " ", "+"));
+
+	log::debug("Full URL to call: {}", url);
 
 	//	Makes the request
 	auto req = web::WebRequest();
@@ -403,17 +424,15 @@ void GalleryLayer::fetchGallery()
 			}
 			else
 			{
-				if (m_errorLabel)
-					m_errorLabel->removeMeAndCleanup();
-
-				m_errorLabel = CCLabelBMFont::create(fmt::format("Something went wrong (Error {})", res.code()).c_str(), "goldFont.fnt");
-				this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
-				m_errorLabel->setID("error-text");
-				m_errorLabel->setScale(0.6f);
-
-				m_loading->setVisible(false);
 				log::error("Error {}: Failed on fetching gallery data... {}", res.code(), res.errorMessage());
 
+				if (m_errorLabel)
+				{
+					m_errorLabel->setCString(fmt::format("Something went wrong (Error {})", res.code()).c_str());
+					m_errorLabel->setVisible(true);
+				}
+
+				m_loading->setVisible(false);
 				errorPopup();
 			}
 		});
@@ -421,12 +440,12 @@ void GalleryLayer::fetchGallery()
 
 void GalleryLayer::loadGallery()
 {
-	if (m_loading)
-		m_loading->setVisible(false);
-
 	m_maxPage = m_fetchedData["totalPages"].asInt().unwrapOr(999) - 1;
 	auto totalIcons = m_fetchedData["totalIcons"].asInt().unwrapOr(1);
 	auto offset = (m_page * 10);
+
+	if (m_loading)
+		m_loading->setVisible(false);
 
 	//	Updates the label of the Pages
 	if (m_pageLabel)
@@ -449,10 +468,11 @@ void GalleryLayer::loadGallery()
 
 	if (m_fetchedData["totalIcons"].asInt().unwrapOr(0) == 0)
 	{
-		m_errorLabel = CCLabelBMFont::create("No icons found.", "goldFont.fnt");
-		this->addChildAtPosition(m_errorLabel, Anchor::Center, ccp(0, 0), false);
-		m_errorLabel->setID("error-text");
-		m_errorLabel->setScale(0.6f);
+		if (m_errorLabel)
+		{
+			m_errorLabel->setCString("No icons found.");
+			m_errorLabel->setVisible(true);
+		}
 	}
 	else
 	{
@@ -549,10 +569,7 @@ void GalleryLayer::onNavButton(CCObject *sender)
 	if (m_activeBtn == m_prevModeBtn)
 	{
 		if (auto button = static_cast<CCMenuItemToggler *>(m_modesMenu->getChildByTag(m_activeBtn)))
-		{
-			//	log::debug("Button active?");
 			button->toggle(false);
-		}
 
 		return;
 	}
@@ -589,7 +606,7 @@ void GalleryLayer::onFind(CCObject *sender)
 
 	if (tag == 0)
 	{
-		log::debug("Page = {} - Max Page = {}", m_page, m_maxPage);
+		log::debug("Current Page: {} -- Max allowed page: {}", m_page, m_maxPage);
 
 		auto popup = SetIDPopup::create(m_page + 1, 1, m_maxPage + 1, "Go to page", "Go", true, 1, 0, false, true);
 		popup->m_delegate = this;
@@ -598,6 +615,8 @@ void GalleryLayer::onFind(CCObject *sender)
 	}
 	else if (tag == 1)
 	{
+		log::debug("Current Search Filter: \"{}\"", m_searchFilter);
+
 		auto popup = SetTextPopup::create(m_searchFilter, "Enter a Name", 100, "Search Icon", "Go", true, 0);
 		popup->m_delegate = this;
 		popup->setTag(0);
@@ -605,6 +624,8 @@ void GalleryLayer::onFind(CCObject *sender)
 	}
 	else
 	{
+		log::debug("Current Author Filter: \"{}\"", m_authorFilter);
+
 		auto popup = SetTextPopup::create(m_authorFilter, "Enter an User", 100, "Search by Author", "Go", true, 0);
 		popup->m_delegate = this;
 		popup->setTag(1);
@@ -617,7 +638,7 @@ void GalleryLayer::setIDPopupClosed(SetIDPopup *popup, int value)
 	if (!popup || popup->m_cancelled)
 		return;
 
-	log::debug("Changed Page = {}", value);
+	log::debug("Changed Page: {}", value);
 
 	//	Arrow Buttons
 	m_prevBtn->setVisible(false);
@@ -654,7 +675,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 		m_searchFilter = text;
 
-		log::debug("Search filter updated to {}", text);
+		log::debug("Search filter updated to: \"{}\"", text);
 	}
 	else
 	{
@@ -663,9 +684,10 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 
 		m_authorFilter = text;
 
-		log::debug("Author filter updated");
+		log::debug("Author filter updated to: \"{}\"", text);
 	}
 
+	//	Updates the button's base color if a filter is applied.
 	if (m_findBtn)
 	{
 		auto spriteName = m_searchFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
@@ -673,6 +695,7 @@ void GalleryLayer::setTextPopupClosed(SetTextPopup *popup, gd::string text)
 		m_findBtn->updateSprite();
 	}
 
+	//	Updates the button's base color if a filter is applied.
 	if (m_authorBtn)
 	{
 		auto spriteName = m_authorFilter.empty() ? "geode.loader/baseEditor_Normal_Green.png" : "geode.loader/baseEditor_Normal_Cyan.png";
@@ -696,8 +719,6 @@ void GalleryLayer::onSettings(CCObject *)
 
 void GalleryLayer::onFolder(CCObject *)
 {
-	//	utils::file::openFolder(Mod::get()->getConfigDir());
-
 	if (!Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder").empty())
 	{
 		utils::file::openFolder(Mod::get()->getSettingValue<std::filesystem::path>("icon-pack-folder"));
